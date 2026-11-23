@@ -8,10 +8,16 @@
     <file>characters/giyu/scene.png</file>
     <file>characters/gojo/portrait.png</file>
     <file>characters/gojo/scene.png</file>
+    <file>characters/gusion/portrait.png</file>
+    <file>characters/gusion/scene.png</file>
     <file>characters/itachi/portrait.png</file>
     <file>characters/itachi/scene.png</file>
+    <file>characters/julian/portrait.png</file>
+    <file>characters/julian/scene.png</file>
     <file>characters/killua/portrait.png</file>
     <file>characters/killua/scene.png</file>
+    <file>characters/megumi/portrait.png</file>
+    <file>characters/megumi/scene.png</file>
     <file>characters/muichiro/portrait.png</file>
     <file>characters/muichiro/scene.png</file>
     <file>characters/naruto/portrait.png</file>
@@ -30,5 +36,7 @@
     <file>characters/sung-jinwoo/scene.png</file>
     <file>characters/tanjiro/portrait.png</file>
     <file>characters/tanjiro/scene.png</file>
+    <file>characters/yu-zhong/portrait.png</file>
+    <file>characters/yu-zhong/scene.png</file>
   </qresource>
 </RCC>

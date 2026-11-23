@@ -78,6 +78,14 @@ inline constexpr std::array presets{
         "M18 5v26M7 12l22 12M7 24l22-12M14 7l4 4 4-4m-8 22 4-4 4 4 M7 16l6-1-2-6m18 11-6 1 2 6 M7 20l6 1-2 6m18-11-6-1 2-6"},
     Preset{"sukuna", "Ryomen Sukuna", 7, 0xFF5269, 0xFF916F, 0xD1A4F5,
         "M7 15l3-5 8-4 8 4 3 5H7Z M10 18h16v9H10Z M6 30h24 M14 27v-5h8v5 M15 10l3 2 3-2"},
+    Preset{"megumi", "Megumi Fushiguro", 164, 0x6FDEC1, 0x73AEE5, 0xCFECE6,
+        "M6 8l7 5h10l7-5-2 13-4 5-6 5-6-5-4-5Z M11 18l4 2m10-2-4 2m-5 5h4"},
+    Preset{"gusion", "Gusion · Soul Revelation", 252, 0xAAA4FF, 0x73DFFD, 0xF4DAA6,
+        "M18 5 22 13 18 23 14 13Z M18 23v8 M13 22l5 3 5-3 M7 10l2 5-2 5-2-5Z M29 10l2 5-2 5-2-5Z"},
+    Preset{"julian", "Julian · Scarlet Raven", 25, 0xF5825C, 0xEBC27C, 0xE1ACBB,
+        "M8 29c0-9 6-17 19-23 2 10-2 18-12 21l-7 2Z M8 29 24 10M11 22l8-1m-3-5 7-1"},
+    Preset{"yu-zhong", "Yu Zhong · Exorcist", 309, 0xF1ACDF, 0xFF7A71, 0xD3D1FF,
+        "M8 25c-2-6 6-8 6-13l-3-5 7 2 4-4 2 8 5 4-6 4-4-2-4 6 6 4 M22 13h1 M10 29l4 2"},
 };
 
 namespace detail {

@@ -49,6 +49,10 @@ pengguna, lalu buka ulang aplikasi.
 | Doma · Bulan Atas Dua | `doma` |
 | Akaza · Bulan Atas Tiga | `akaza` |
 | Ryomen Sukuna | `sukuna` |
+| Megumi Fushiguro | `megumi` |
+| Gusion · Soul Revelation | `gusion` |
+| Julian · Scarlet Raven | `julian` |
+| Yu Zhong · Exorcist | `yu-zhong` |
 
 ## Build desktop
 

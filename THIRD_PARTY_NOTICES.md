@@ -10,3 +10,6 @@
 - Tema memuat ilustrasi penggemar dari Solo Leveling, Naruto, Demon Slayer,
   Jujutsu Kaisen, Hunter × Hunter, dan Spider-Man (Marvel). Hak atas karakter
   dan seri tetap pada pemegang hak masing-masing.
+- Tema Gusion, Julian, dan Yu Zhong memuat ilustrasi orisinal yang terinspirasi
+  oleh Mobile Legends: Bang Bang. Nama karakter dan skin terkait milik
+  pemegang hak masing-masing.
