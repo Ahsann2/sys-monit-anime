@@ -72,6 +72,10 @@ inline constexpr std::array presets{
         "M18 16C15 9 7 6 5 10c-3 5 3 10 9 10-5 1-7 5-4 8 3 2 7-1 8-6 1 5 5 8 8 6 3-3 1-7-4-8 6 0 12-5 9-10-2-4-10-1-13 6Z M18 16v7m0-7-4-6m4 6 4-6"},
     Preset{"spider-man", "Spider-Man", 208, 0xFF6472, 0x71B3FF, 0xD7EEFF,
         "M18 11c-3 0-4 3-3 5-3 3-1 10 3 10s6-7 3-10c1-2 0-5-3-5Z M15 16l-5-5V7 M14 18l-7-4V9 M14 20l-7 1-2 5 M15 22l-4 3v5 M21 16l5-5V7 M22 18l7-4V9 M22 20l7 1 2 5 M21 22l4 3v5"},
+    Preset{"doma", "Doma · Bulan Atas Dua", 187, 0xA1E7F4, 0xF0BF80, 0xD1BEFF,
+        "M8 25a11 11 0 0 1 20 0l-10 4Z M18 29V12m0 17-6-15m6 15 6-15 M18 5v3m-6-1 2 2m10-2-2 2"},
+    Preset{"akaza", "Akaza · Bulan Atas Tiga", 317, 0xF37BAB, 0x72D8FC, 0xDEB7FF,
+        "M18 5v26M7 12l22 12M7 24l22-12M14 7l4 4 4-4m-8 22 4-4 4 4 M7 16l6-1-2-6m18 11-6 1 2 6 M7 20l6 1-2 6m18-11-6-1 2-6"},
 };
 
 namespace detail {

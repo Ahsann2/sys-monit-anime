@@ -46,6 +46,8 @@ pengguna, lalu buka ulang aplikasi.
 | Naruto Uzumaki · Kurama | `naruto` |
 | Shinobu Kocho | `shinobu` |
 | Spider-Man | `spider-man` |
+| Doma · Bulan Atas Dua | `doma` |
+| Akaza · Bulan Atas Tiga | `akaza` |
 
 ## Build desktop
 

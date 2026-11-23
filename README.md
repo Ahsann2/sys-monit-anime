@@ -2,7 +2,7 @@
 
 Dashboard pemantau perangkat dengan animasi kipas. C++20 dan Qt 6 untuk Linux, Windows, dan macOS. Data sensor mengikuti dukungan OS dan driver.
 
-Pilih tema bawaan atau salah satu dari 12 tema karakter di **Pengaturan → Tampilan**.
+Pilih tema bawaan atau salah satu dari 14 tema karakter di **Pengaturan → Tampilan**.
 
 ## Cara menjalankan
 

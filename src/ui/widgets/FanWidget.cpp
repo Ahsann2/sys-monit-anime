@@ -52,6 +52,8 @@ RotorDesign rotorDesign() {
         Shape{"naruto", {9, 48, 136, 63}},
         Shape{"shinobu", {4, 112, 109, 101}},
         Shape{"spider-man", {8, 43, 131, 67, true}},
+        Shape{"doma", {6, 91, 107, 99}},
+        Shape{"akaza", {6, 42, 138, 51}},
     };
     const std::string_view id(theme::preset().id);
     const auto found = std::ranges::find_if(shapes, [id](const auto& shape) {

@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="/">
+    <file>characters/akaza/portrait.png</file>
+    <file>characters/akaza/scene.png</file>
+    <file>characters/doma/portrait.png</file>
+    <file>characters/doma/scene.png</file>
     <file>characters/giyu/portrait.png</file>
     <file>characters/giyu/scene.png</file>
     <file>characters/gojo/portrait.png</file>
