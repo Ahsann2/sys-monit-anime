@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="vivoguard.svg">vivoguard.svg</file>
+    <file alias="vivoguard.png">vivoguard.png</file>
+    <file alias="panel-texture.png">panel-texture.png</file>
+    <file>fonts/Oxanium-SemiBold.ttf</file>
+    <file>fonts/Oxanium-OFL.txt</file>
+    <file>reference-icons/activity.svg</file>
+    <file>reference-icons/battery.svg</file>
+    <file>reference-icons/bolt.svg</file>
+    <file>reference-icons/brush.svg</file>
+    <file>reference-icons/clock.svg</file>
+    <file>reference-icons/cpu.svg</file>
+    <file>reference-icons/fan.svg</file>
+    <file>reference-icons/fullscreen.svg</file>
+    <file>reference-icons/fullscreen-exit.svg</file>
+    <file>reference-icons/home.svg</file>
+    <file>reference-icons/laptop.svg</file>
+    <file>reference-icons/layers.svg</file>
+    <file>reference-icons/network.svg</file>
+    <file>reference-icons/process.svg</file>
+    <file>reference-icons/rocket.svg</file>
+    <file>reference-icons/settings.svg</file>
+    <file>reference-icons/slash.svg</file>
+  </qresource>
+</RCC>

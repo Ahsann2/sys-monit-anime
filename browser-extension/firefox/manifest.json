@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Monitor Sistem Browser Companion",
+  "version": "1.0.0",
+  "description": "Optional local browser companion for Monitor Sistem.",
+  "permissions": [
+    "nativeMessaging",
+    "tabs"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "applications": {
+    "gecko": {
+      "id": "vivoguard@local"
+    }
+  }
+}

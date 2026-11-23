@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Monitor Sistem
+GenericName=Monitor & Proteksi Sistem
+Comment=Monitor dan proteksi sistem lokal
+Exec=vivoguard
+Icon=vivoguard
+Terminal=false
+Categories=System;Monitor;
+Keywords=monitor;cpu;gpu;ram;temperature;fan;cleaner;
+StartupNotify=true

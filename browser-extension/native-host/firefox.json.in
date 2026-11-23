@@ -1,0 +1,9 @@
+{
+  "name": "com.vivoguard.browser",
+  "description": "VivoGuard native browser bridge",
+  "path": "@HOST_PATH@",
+  "type": "stdio",
+  "allowed_extensions": [
+    "vivoguard@local"
+  ]
+}

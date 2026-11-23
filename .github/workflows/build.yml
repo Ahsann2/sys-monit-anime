@@ -1,0 +1,102 @@
+name: Desktop build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build qt6-base-dev qt6-svg-dev libgl1-mesa-dev
+      - run: cmake --preset release
+      - run: cmake --build --preset release --parallel 2
+      - run: ctest --preset release
+      - run: cpack --config build/release/CPackConfig.cmake -B dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monitor-sistem-linux-${{ matrix.arch }}
+          path: dist/*.deb
+          if-no-files-found: error
+
+  windows:
+    name: Windows ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            arch: x64
+            generator-arch: x64
+            qt-arch: win64_msvc2022_64
+          - runner: windows-11-arm
+            arch: arm64
+            generator-arch: ARM64
+            qt-arch: win64_msvc2022_arm64_cross_compiled
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: ${{ matrix.qt-arch }}
+          archives: qtbase qtsvg
+      - run: cmake -S . -B build/native -A ${{ matrix.generator-arch }} -DVIVOGUARD_DEPLOY_QT=ON
+      - run: cmake --build build/native --config Release --parallel 2
+      - run: ctest --test-dir build/native --build-config Release --output-on-failure
+      - run: cmake --install build/native --config Release --prefix dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monitor-sistem-windows-${{ matrix.arch }}
+          path: dist
+          if-no-files-found: error
+
+  macos:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x86_64
+          - runner: macos-15
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: clang_64
+          archives: qtbase qtsvg
+      - run: >
+          cmake -S . -B build/native -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+          -DVIVOGUARD_DEPLOY_QT=ON
+      - run: cmake --build build/native --parallel 2
+      - run: ctest --test-dir build/native --output-on-failure
+      - run: cmake --install build/native --prefix dist
+      - name: Archive the application bundle
+        run: ditto -c -k --sequesterRsrc --keepParent dist monitor-sistem-macos.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monitor-sistem-macos-${{ matrix.arch }}
+          path: monitor-sistem-macos.zip
+          if-no-files-found: error

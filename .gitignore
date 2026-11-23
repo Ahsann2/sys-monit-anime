@@ -1,0 +1,9 @@
+/build/
+/build-core/
+*.deb
+*.zip
+compile_commands.json
+/aqtinstall.log
+/assets/reference-*.png
+/assets/reference-artwork.qrc
+/docs/ui-preview-local.png

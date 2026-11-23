@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Monitor Sistem
+Comment=Pantau perangkat keras setelah login
+Exec=vivoguard --tray
+Icon=vivoguard
+Terminal=false
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=GNOME;Unity;

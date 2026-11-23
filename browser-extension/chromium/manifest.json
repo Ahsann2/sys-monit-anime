@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Monitor Sistem Browser Companion",
+  "version": "1.0.0",
+  "description": "Optional local browser companion for Monitor Sistem.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzkhFmYZVyN4nBhmrS6sQtcEXvamYAsnBdH7vYC5n2B1UgP5Srm25p8k9whul8sPHBQ1oJU3UjPOPk0UGouESCficwoXzS0+dAMVa4yiQ3rOf/ybxxmdR2SlITA3OGOxlGwfKK4x6WzYZamKapwZMYvbVgPwz+SD2AHiT1ZUUsj5O9wKWSh+uCk20YVqnsngK1JNU/cnLBiHnBxmAF/3woIOGVQ8dMN9Y66xVnRxaCFSKzIJ9l4YgOw39JAxU5SsCAyPahM0uqqt5rPlTp8o1g170CjMxNfTRgmjv2A99486CI25Nf1OVBDzrfMl7/Pe6xhAOJa5zP8jGqMMabf31CwIDAQAB",
+  "permissions": [
+    "nativeMessaging",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Monitor Sistem Browser Companion"
+  }
+}
