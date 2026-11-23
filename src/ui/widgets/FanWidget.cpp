@@ -25,12 +25,13 @@ constexpr qreal artworkHeight = 596.0;
 constexpr qreal artworkInset = 6.0;
 constexpr QPointF referenceCenter{232.0, 223.4};
 constexpr qreal referenceRotorRadius = 160.0;
+constexpr int megumiBladeCount = 6;
 
 struct RotorDesign {
     int blades;
-    qreal shoulder;
-    qreal tip;
-    qreal sweep;
+    qreal shoulder{95};
+    qreal tip{125};
+    qreal sweep{77};
     bool centeredEmblem{false};
 };
 
@@ -54,7 +55,7 @@ RotorDesign rotorDesign() {
         Shape{"spider-man", {8, 43, 131, 67, true}},
         Shape{"doma", {6, 91, 107, 99}},
         Shape{"akaza", {6, 42, 138, 51}},
-        Shape{"megumi", {2, 72, 147, 43}},
+        Shape{"megumi", {megumiBladeCount}},
         Shape{"gusion", {5, 29, 123, 96}},
         Shape{"julian", {3, 125, 134, 61}},
         Shape{"yu-zhong", {5, 92, 125, 86}},
@@ -63,7 +64,7 @@ RotorDesign rotorDesign() {
     const auto found = std::ranges::find_if(shapes, [id](const auto& shape) {
         return id == shape.id;
     });
-    return found != shapes.end() ? found->rotor : RotorDesign{7, 95, 125, 77};
+    return found != shapes.end() ? found->rotor : RotorDesign{7};
 }
 
 void paintShrineRotor(QPainter& painter) {
@@ -107,6 +108,52 @@ void paintShrineRotor(QPainter& painter) {
     painter.setPen(QPen(QColor("#FFAB89"), 1.6, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(QPointF(-10, 7), QPointF(7, -10));
     painter.drawLine(QPointF(-5, 12), QPointF(12, -5));
+}
+
+void paintMegumiRotor(QPainter& painter) {
+    QPainterPath blade;
+    blade.moveTo(19, -8);
+    blade.cubicTo(32, -22, 37, -55, 69, -85);
+    blade.cubicTo(86, -101, 106, -108, 115, -102);
+    blade.cubicTo(120, -98, 116, -92, 108, -85);
+    blade.cubicTo(90, -69, 91, -55, 81, -38);
+    blade.cubicTo(71, -20, 45, -9, 27, 7);
+    blade.closeSubpath();
+
+    QPainterPath bevel;
+    bevel.moveTo(29, -14);
+    bevel.cubicTo(45, -35, 51, -60, 74, -82);
+    bevel.cubicTo(88, -95, 101, -101, 111, -101);
+
+    QLinearGradient steel(20, 4, 109, -101);
+    steel.setColorAt(0, QColor("#293341"));
+    steel.setColorAt(.4, QColor("#4B5D74"));
+    steel.setColorAt(.77, QColor("#7087A1"));
+    steel.setColorAt(1, QColor("#ABBED3"));
+    QLinearGradient silver(30, -14, 111, -101);
+    silver.setColorAt(0, QColor(158, 180, 202, 32));
+    silver.setColorAt(.6, QColor(188, 205, 225, 150));
+    silver.setColorAt(1, QColor(233, 241, 251, 224));
+
+    for (int index = 0; index < megumiBladeCount; ++index) {
+        painter.setBrush(steel);
+        painter.setPen(QPen(QColor("#788CA5"), .9));
+        painter.drawPath(blade);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(QBrush(silver), 1.5, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPath(bevel);
+        painter.rotate(360.0 / megumiBladeCount);
+    }
+
+    QRadialGradient hub(QPointF(-7, -8), 35);
+    hub.setColorAt(0, QColor("#49576A"));
+    hub.setColorAt(1, QColor("#161D26"));
+    painter.setBrush(hub);
+    painter.setPen(QPen(QColor("#8296AD"), 1.35));
+    painter.drawEllipse(QPointF{}, 27, 27);
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(QColor("#B0C3D9"), .8));
+    painter.drawEllipse(QPointF{}, 16, 16);
 }
 
 void paintStandardRotor(QPainter& painter, const RotorDesign& design) {
@@ -431,8 +478,11 @@ void FanWidget::prepareArtwork() {
         paint.setRenderHint(QPainter::Antialiasing);
         paint.translate(diameter / 2.0, diameter / 2.0);
         paint.scale(diameter / 320.0, diameter / 320.0);
-        if (theme::currentPreset() == "sukuna") {
+        const std::string_view character(theme::preset().id);
+        if (character == "sukuna") {
             paintShrineRotor(paint);
+        } else if (character == "megumi") {
+            paintMegumiRotor(paint);
         } else {
             paintStandardRotor(paint, design);
         }
