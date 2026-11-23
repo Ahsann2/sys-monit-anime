@@ -31,6 +31,7 @@ struct RotorDesign {
     qreal shoulder;
     qreal tip;
     qreal sweep;
+    bool centeredEmblem{false};
 };
 
 RotorDesign rotorDesign() {
@@ -50,6 +51,7 @@ RotorDesign rotorDesign() {
         Shape{"killua", {6, 30, 146, 43}},
         Shape{"naruto", {9, 48, 136, 63}},
         Shape{"shinobu", {4, 112, 109, 101}},
+        Shape{"spider-man", {8, 43, 131, 67, true}},
     };
     const std::string_view id(theme::preset().id);
     const auto found = std::ranges::find_if(shapes, [id](const auto& shape) {
@@ -320,6 +322,11 @@ void FanWidget::prepareArtwork() {
         paint.setClipPath(outline);
         if (useReferenceScene) {
             paintScenery(paint, referenceScenery, artwork, size());
+        } else if (design.centeredEmblem && !characterPortrait_.isNull()) {
+            const qreal span = referenceRotorRadius * 1.5 * scale;
+            const auto fit = QSizeF(characterPortrait_.size()).scaled(span, span, Qt::KeepAspectRatio);
+            const QPointF origin = center - QPointF(fit.width() / 2, fit.height() / 2);
+            paint.drawPixmap(QRectF(origin, fit), characterPortrait_, characterPortrait_.rect());
         } else if (!characterPortrait_.isNull()) {
             paintPortrait(paint, characterPortrait_, size());
         }

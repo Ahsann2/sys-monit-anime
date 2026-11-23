@@ -8,5 +8,5 @@
   serta source yang sesuai dengan versi Qt saat mendistribusikan runtime Qt.
 - Driver NVIDIA dan pustaka NVML berasal dari instalasi driver pengguna.
 - Tema memuat ilustrasi penggemar dari Solo Leveling, Naruto, Demon Slayer,
-  Jujutsu Kaisen, dan Hunter × Hunter. Hak atas karakter dan seri tetap pada
-  pemegang hak masing-masing.
+  Jujutsu Kaisen, Hunter × Hunter, dan Spider-Man (Marvel). Hak atas karakter
+  dan seri tetap pada pemegang hak masing-masing.

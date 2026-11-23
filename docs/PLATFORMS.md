@@ -45,6 +45,7 @@ pengguna, lalu buka ulang aplikasi.
 | Killua Zoldyck | `killua` |
 | Naruto Uzumaki · Kurama | `naruto` |
 | Shinobu Kocho | `shinobu` |
+| Spider-Man | `spider-man` |
 
 ## Build desktop
 
