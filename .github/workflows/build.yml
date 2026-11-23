@@ -50,7 +50,7 @@ jobs:
           - runner: windows-11-arm
             arch: arm64
             generator-arch: ARM64
-            qt-arch: win64_msvc2022_arm64_cross_compiled
+            qt-arch: win64_msvc2022_arm64
     steps:
       - uses: actions/checkout@v4
       - uses: jurplel/install-qt-action@v4
@@ -61,7 +61,7 @@ jobs:
       - run: cmake -S . -B build/native -A ${{ matrix.generator-arch }} -DVIVOGUARD_DEPLOY_QT=ON
       - run: cmake --build build/native --config Release --parallel 2
       - run: ctest --test-dir build/native --build-config Release --output-on-failure
-      - run: cmake --install build/native --config Release --prefix dist
+      - run: cmake --install build/native --config Release --prefix "$env:GITHUB_WORKSPACE/dist"
       - uses: actions/upload-artifact@v4
         with:
           name: monitor-sistem-windows-${{ matrix.arch }}

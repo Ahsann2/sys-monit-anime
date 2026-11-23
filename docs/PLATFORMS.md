@@ -44,7 +44,7 @@ Windows, melalui Developer PowerShell untuk Visual Studio:
 cmake -S . -B build/native -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" -DVIVOGUARD_DEPLOY_QT=ON
 cmake --build build/native --config Release
 ctest --test-dir build/native -C Release --output-on-failure
-cmake --install build/native --config Release --prefix dist
+cmake --install build/native --config Release --prefix "$PWD/dist"
 ```
 
 Untuk Windows ARM64, pakai SDK Qt dan MSVC untuk ARM64 serta `-A ARM64`.
