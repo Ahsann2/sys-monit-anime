@@ -2,10 +2,10 @@
 set -euo pipefail
 
 project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-host_path="$(command -v vivoguard-browser-host || true)"
+host_path="$(command -v sys-monit-anime-browser-host || true)"
 
-if [[ -z "${host_path}" && -x "${project_dir}/build/vivoguard-browser-host" ]]; then
-  host_path="${project_dir}/build/vivoguard-browser-host"
+if [[ -z "${host_path}" && -x "${project_dir}/build/sys-monit-anime-browser-host" ]]; then
+  host_path="${project_dir}/build/sys-monit-anime-browser-host"
 fi
 
 if [[ -z "${host_path}" ]]; then

@@ -25,5 +25,5 @@ cmake --build "${build_dir}" --parallel "${VIVOGUARD_BUILD_JOBS:-2}"
 ctest --test-dir "${build_dir}" --output-on-failure
 
 printf '\nBuild complete:\n'
-printf '  UI:    %s\n' "${build_dir}/vivoguard"
-printf '  Probe: %s\n' "${build_dir}/vivoguard-probe"
+printf '  UI:    %s\n' "${build_dir}/sys-monit-anime"
+printf '  Probe: %s\n' "${build_dir}/sys-monit-anime-probe"

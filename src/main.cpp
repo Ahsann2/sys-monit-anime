@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     QFontDatabase::addApplicationFont(":/fonts/Oxanium-SemiBold.ttf");
     QApplication::setApplicationName(vg::ui::theme::appName);
     QApplication::setApplicationDisplayName(vg::ui::theme::appName);
-    QApplication::setDesktopFileName("vivoguard");
+    QApplication::setDesktopFileName("sys-monit-anime");
     QApplication::setApplicationVersion(VIVOGUARD_VERSION);
     QApplication::setWindowIcon(QIcon(":/vivoguard.png"));
     QApplication::setQuitOnLastWindowClosed(

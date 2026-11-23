@@ -15,8 +15,8 @@ cmake --build --preset release
 
 | OS | Perintah |
 | --- | --- |
-| Linux | `./build/release/vivoguard` |
-| Windows | `.\build\release\vivoguard.exe` |
-| macOS | `open "build/release/Monitor Sistem.app"` |
+| Linux | `./build/release/sys-monit-anime` |
+| Windows | `.\build\release\sys-monit-anime.exe` |
+| macOS | `open build/release/sys-monit-anime.app` |
 
 [Dukungan perangkat](docs/PLATFORMS.md) · [Lisensi MIT](LICENSE)

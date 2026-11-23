@@ -10,10 +10,10 @@ test:
 	./scripts/test-core.sh
 
 run: build
-	./build/vivoguard
+	./build/sys-monit-anime
 
 probe: build
-	./build/vivoguard-probe
+	./build/sys-monit-anime-probe
 
 install: build
 	./scripts/install.sh

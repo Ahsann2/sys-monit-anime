@@ -245,7 +245,7 @@ private:
 };
 
 QString processDisplayName(const ProcessInfo& process) {
-    if (process.name == "vivoguard" || process.name == "vivoguard.exe") {
+    if (process.name == "sys-monit-anime" || process.name == "sys-monit-anime.exe") {
         return theme::appName;
     }
     if (!process.name.empty()) {
@@ -1095,7 +1095,7 @@ QWidget* MainWindow::buildSettingsPage() {
         QFileInfo::exists(
             QStandardPaths::writableLocation(
                 QStandardPaths::ConfigLocation) +
-            "/autostart/vivoguard.desktop"));
+            "/autostart/sys-monit-anime.desktop"));
     connect(autostartCheck_, &QCheckBox::toggled,
         this, [this](bool enabled) { setAutostart(enabled); });
     behaviorLayout->addWidget(autostartCheck_, 2, 0, 1, 2);
@@ -2120,7 +2120,7 @@ void MainWindow::setAutostart(bool enabled) {
         QStandardPaths::writableLocation(
             QStandardPaths::ConfigLocation) +
         "/autostart";
-    const QString path = directory + "/vivoguard.desktop";
+    const QString path = directory + "/sys-monit-anime.desktop";
     if (!enabled) {
         if (!QFile::remove(path) && QFileInfo::exists(path)) {
             QMessageBox::warning(
@@ -2142,7 +2142,7 @@ void MainWindow::setAutostart(bool enabled) {
         "Name=Monitor Sistem\n"
         "Comment=Guardian sistem lokal\n"
         "Exec=\"%1\" --tray\n"
-        "Icon=vivoguard\n"
+        "Icon=sys-monit-anime\n"
         "Terminal=false\n"
         "Categories=System;Monitor;\n"
         "X-GNOME-Autostart-enabled=true\n")

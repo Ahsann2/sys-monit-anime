@@ -57,10 +57,12 @@ endif()
 target_include_directories(vivoguard_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 add_executable(vivoguard-probe src/probe_main.cpp)
+set_target_properties(vivoguard-probe PROPERTIES OUTPUT_NAME "sys-monit-anime-probe")
 target_link_libraries(vivoguard-probe PRIVATE vivoguard_core)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable(vivoguard-browser-host src/browser_host_main.cpp)
+    set_target_properties(vivoguard-browser-host PROPERTIES OUTPUT_NAME "sys-monit-anime-browser-host")
     install(TARGETS vivoguard-browser-host RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endif()
 
@@ -81,6 +83,7 @@ if(VIVOGUARD_BUILD_UI)
         src/ui/widgets/GaugeCard.cpp
         src/ui/widgets/TimelineChart.cpp
     )
+    set_target_properties(vivoguard PROPERTIES OUTPUT_NAME "sys-monit-anime")
 
     target_link_libraries(vivoguard PRIVATE
         vivoguard_core
@@ -91,7 +94,7 @@ if(VIVOGUARD_BUILD_UI)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         target_link_libraries(vivoguard PRIVATE Qt6::DBus)
     elseif(APPLE)
-        set_target_properties(vivoguard PROPERTIES OUTPUT_NAME "Monitor Sistem"
+        set_target_properties(vivoguard PROPERTIES
             MACOSX_BUNDLE_GUI_IDENTIFIER "org.monitorsistem.desktop"
             MACOSX_BUNDLE_BUNDLE_NAME "Monitor Sistem"
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
@@ -115,9 +118,11 @@ if(VIVOGUARD_BUILD_UI)
         BUNDLE DESTINATION .
     )
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        install(FILES assets/vivoguard.svg DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps")
-        install(FILES assets/vivoguard.png DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/512x512/apps")
-        install(FILES packaging/vivoguard.desktop DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
+        install(FILES assets/vivoguard.svg DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps"
+            RENAME "sys-monit-anime.svg")
+        install(FILES assets/vivoguard.png DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/512x512/apps"
+            RENAME "sys-monit-anime.png")
+        install(FILES packaging/sys-monit-anime.desktop DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
     elseif(VIVOGUARD_DEPLOY_QT AND NOT CMAKE_CROSSCOMPILING)
         qt_generate_deploy_app_script(TARGET vivoguard OUTPUT_SCRIPT deploy_script)
         install(SCRIPT "${deploy_script}")
@@ -147,7 +152,7 @@ if(VIVOGUARD_BUILD_TESTS)
     endif()
 endif()
 
-set(CPACK_PACKAGE_NAME "vivoguard")
+set(CPACK_PACKAGE_NAME "sys-monit-anime")
 set(CPACK_PACKAGE_VENDOR "Monitor Sistem")
 set(CPACK_PACKAGE_CONTACT "Monitor Sistem")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")

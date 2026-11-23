@@ -58,7 +58,7 @@ HardwareProfile HardwareProfile::vivoBookPro15Oled() {
         "gnome-session-c", "dbus-daemon", "dbus-broker", "pipewire",
         "pipewire-pulse", "wireplumber", "Xorg", "Xwayland",
         "NetworkManager", "gdm-wayland-ses", "gdm-x-session",
-        "xdg-desktop-por", "vivoguard", "codex", "aimcp",
+        "xdg-desktop-por", "sys-monit-anime", "vivoguard", "codex", "aimcp",
         "gnome-terminal-", "pulseaudio", "wireplumber"
     };
     return profile;

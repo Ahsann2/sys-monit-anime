@@ -80,7 +80,7 @@ keluar dari sesi tidak mengirim perintah tab.
 Pengujian lokal:
 
 1. Jalankan `./scripts/test-core.sh`.
-2. Jalankan `vivoguard-probe`.
+2. Jalankan `sys-monit-anime-probe`.
 3. Pastikan nama sensor dan GPU sesuai.
 4. Uji Close Applications dengan dokumen dummy.
 5. Uji Fresh Session setelah seluruh pekerjaan disimpan.

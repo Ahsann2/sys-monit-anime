@@ -2,8 +2,8 @@
 Type=Application
 Name=Monitor Sistem
 Comment=Pantau perangkat keras setelah login
-Exec=vivoguard --tray
-Icon=vivoguard
+Exec=sys-monit-anime --tray
+Icon=sys-monit-anime
 Terminal=false
 X-GNOME-Autostart-enabled=true
 OnlyShowIn=GNOME;Unity;

@@ -8,7 +8,7 @@
   "configurePresets": [
     {
       "name": "release",
-      "displayName": "VivoGuard Release",
+      "displayName": "sys-monit-anime Release",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/release",
       "cacheVariables": {
@@ -19,7 +19,7 @@
     },
     {
       "name": "debug",
-      "displayName": "VivoGuard Debug",
+      "displayName": "sys-monit-anime Debug",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/debug",
       "cacheVariables": {

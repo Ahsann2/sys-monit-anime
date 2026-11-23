@@ -47,12 +47,12 @@ Urutan CPU hwmon:
 3. `asus_wmi_sensors`
 4. `acpitz`
 
-Jika tidak ditemukan, VivoGuard mencoba generic thermal zones. Nilai tidak
+Jika tidak ditemukan, Monitor Sistem mencoba zona termal generik. Nilai tidak
 tersedia ditampilkan sebagai N/A atau EC AUTO; tidak ada sensor sintetis.
 
 ## RTX battery-aware mode
 
-Sebelum NVML diinisialisasi, VivoGuard memeriksa PCI runtime status untuk
+Sebelum NVML diinisialisasi, Monitor Sistem memeriksa PCI runtime status untuk
 vendor NVIDIA. Jika perangkat `suspended`, card ditampilkan sebagai
 `RTD3 SLEEP` dan NVML tidak disentuh. Ini penting pada laptop hybrid graphics
 agar aplikasi monitoring tidak menjadi alasan dGPU terus hidup.

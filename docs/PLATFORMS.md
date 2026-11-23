@@ -61,6 +61,6 @@ cmake --install build/native --prefix dist
 ```
 
 `QT_ROOT_DIR` menunjuk direktori SDK Qt, misalnya direktori `clang_64` di
-macOS. Hasil macOS berupa `Monitor Sistem.app`. Paket pengujian CI tidak
+macOS. Hasil macOS berupa `sys-monit-anime.app`. Paket pengujian CI tidak
 menggunakan sertifikat penandatanganan atau notarization. Untuk distribusi
 biner publik, tinjau penandatanganan dan kewajiban lisensi Qt yang dipakai.
