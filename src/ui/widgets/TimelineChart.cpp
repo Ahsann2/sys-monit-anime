@@ -14,13 +14,12 @@ namespace {
 constexpr qint64 historyMs = 120000;
 constexpr qreal chartIconWidth = 28;
 constexpr qreal chartIconHeight = 22;
-const std::array traceColors{QColor("#F7607A"), QColor("#FFC682"), QColor("#C684CD")};
 
 void drawChartIcon(QPainter& painter, const QPointF& position, qreal scale) {
     painter.save();
     painter.translate(position);
     painter.scale(scale, scale);
-    painter.setPen(QPen(QColor("#FF97AA"), 1.1, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(theme::tint(QColor("#FF97AA")), 1.1, Qt::SolidLine, Qt::RoundCap));
     painter.setBrush(Qt::NoBrush);
     constexpr std::array heights{9, 15, 22, 12};
     for (std::size_t index = 0; index < heights.size(); ++index) {
@@ -162,14 +161,16 @@ void TimelineChart::drawSeries(QPainter& painter, const QRectF& plot, qint64 end
         painter.setPen(QPen(glow, 3.3, Qt::SolidLine, Qt::RoundCap));
         painter.drawPath(line);
     }
-    painter.setPen(QPen(color, series == 0 ? 1.85 : 1.65, Qt::SolidLine, Qt::RoundCap));
+    const auto stroke = series == 2 && !theme::isDefaultPreset() ? Qt::DashLine : Qt::SolidLine;
+    painter.setPen(QPen(color, series == 0 ? 1.85 : 1.65, stroke, Qt::RoundCap));
     painter.drawPath(line);
 }
 
 void TimelineChart::paintEvent(QPaintEvent*) {
+    const auto traceColors = theme::seriesColors();
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.fillRect(rect(), theme::background);
+    painter.fillRect(rect(), theme::tint(theme::background));
     const auto panel = QRectF(rect()).adjusted(.5, .5, -.5, -.5);
     const auto outline = theme::cutFrame(panel);
     painter.fillPath(outline, theme::surfaceGradient(panel));
@@ -178,9 +179,9 @@ void TimelineChart::paintEvent(QPaintEvent*) {
     painter.fillPath(outline, theme::texture());
     painter.restore();
     QLinearGradient border(panel.topLeft(), panel.bottomRight());
-    border.setColorAt(0, QColor("#B45066"));
-    border.setColorAt(.52, QColor("#6E3849"));
-    border.setColorAt(1, QColor("#46313B"));
+    border.setColorAt(0, theme::tint(QColor("#B45066")));
+    border.setColorAt(.52, theme::tint(QColor("#6E3849")));
+    border.setColorAt(1, theme::tint(QColor("#46313B")));
     painter.strokePath(outline, QPen(QBrush(border), 1));
 
     auto plot = QRectF(plotArea());
@@ -225,11 +226,12 @@ void TimelineChart::paintEvent(QPaintEvent*) {
 
     type.setPixelSize(std::max(10, qRound(13 * headerScale)));
     painter.setFont(type);
-    QPen grid(QColor("#674654"), 1);
+    const QPen baseline(theme::tint(QColor("#C296A6")), 1);
+    QPen grid(theme::tint(QColor("#674654")), 1);
     grid.setDashPattern({1.4, 3.5});
     for (int mark : {0, 25, 50, 75, 100}) {
         const qreal y = plot.bottom() - mark / 100.0 * plot.height();
-        painter.setPen(mark == 0 ? QPen(QColor("#C296A6"), 1) : grid);
+        painter.setPen(mark == 0 ? baseline : grid);
         painter.drawLine(QPointF(plot.left(), y), QPointF(plot.right(), y));
         painter.setPen(theme::text);
         painter.drawText(QRectF(5, y - 8, plot.left() - 5 - 12 * xScale, 16),

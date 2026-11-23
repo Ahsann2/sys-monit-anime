@@ -7,5 +7,6 @@
   [source Qt](https://download.qt.io/official_releases/qt/). Sertakan pemberitahuan
   serta source yang sesuai dengan versi Qt saat mendistribusikan runtime Qt.
 - Driver NVIDIA dan pustaka NVML berasal dari instalasi driver pengguna.
-- Ilustrasi referensi lokal tidak termasuk source distribusi. Build default
-  menggunakan animasi kipas vektor yang digambar oleh aplikasi.
+- Tema memuat ilustrasi penggemar dari Solo Leveling, Naruto, Demon Slayer,
+  Jujutsu Kaisen, dan Hunter × Hunter. Hak atas karakter dan seri tetap pada
+  pemegang hak masing-masing.

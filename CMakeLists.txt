@@ -16,7 +16,6 @@ include(GNUInstallDirs)
 
 option(VIVOGUARD_BUILD_UI "Build the Qt desktop application" ON)
 option(VIVOGUARD_BUILD_TESTS "Build core smoke tests" ON)
-option(VIVOGUARD_LOCAL_ARTWORK "Bundle the optional locally supplied illustration" OFF)
 option(VIVOGUARD_DEPLOY_QT "Stage Qt runtime files on Windows and macOS during install" OFF)
 set(VIVOGUARD_QT_RUNTIME_DIR "" CACHE PATH "Runtime libraries for a local Qt SDK")
 
@@ -74,8 +73,10 @@ if(VIVOGUARD_BUILD_UI)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
 
+    qt_add_big_resources(character_artwork assets/characters.qrc OPTIONS --no-compress)
     qt_add_executable(vivoguard WIN32 MACOSX_BUNDLE
         assets/resources.qrc
+        ${character_artwork}
         src/main.cpp
         src/ui/MainWindow.cpp
         src/ui/TelemetryWorker.cpp
@@ -98,12 +99,6 @@ if(VIVOGUARD_BUILD_UI)
             MACOSX_BUNDLE_GUI_IDENTIFIER "org.monitorsistem.desktop"
             MACOSX_BUNDLE_BUNDLE_NAME "Monitor Sistem"
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
-    endif()
-    if(VIVOGUARD_LOCAL_ARTWORK)
-        if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/reference-artwork.qrc")
-            message(FATAL_ERROR "The optional local artwork was not supplied with this source tree.")
-        endif()
-        target_sources(vivoguard PRIVATE assets/reference-artwork.qrc)
     endif()
     target_compile_definitions(vivoguard PRIVATE
         VIVOGUARD_VERSION="${PROJECT_VERSION}"

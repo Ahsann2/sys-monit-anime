@@ -1,4 +1,5 @@
 #include "ui/widgets/FanWidget.h"
+#include "ui/Artwork.h"
 #include "ui/Theme.h"
 
 #include <QFont>
@@ -11,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <string_view>
 
 namespace vg::ui {
 namespace {
@@ -23,6 +25,37 @@ constexpr qreal artworkHeight = 596.0;
 constexpr qreal artworkInset = 6.0;
 constexpr QPointF referenceCenter{232.0, 223.4};
 constexpr qreal referenceRotorRadius = 160.0;
+
+struct RotorDesign {
+    int blades;
+    qreal shoulder;
+    qreal tip;
+    qreal sweep;
+};
+
+RotorDesign rotorDesign() {
+    struct Shape {
+        std::string_view id;
+        RotorDesign rotor;
+    };
+    static constexpr std::array shapes{
+        Shape{"sung-jinwoo", {6, 74, 138, 62}},
+        Shape{"sasuke", {5, 37, 127, 86}},
+        Shape{"tanjiro", {6, 99, 134, 63}},
+        Shape{"giyu", {5, 110, 122, 56}},
+        Shape{"gojo", {3, 110, 116, 98}},
+        Shape{"sanemi", {7, 48, 147, 39}},
+        Shape{"muichiro", {4, 92, 123, 74}},
+        Shape{"itachi", {3, 80, 108, 106}},
+        Shape{"killua", {6, 30, 146, 43}},
+        Shape{"naruto", {9, 48, 136, 63}},
+    };
+    const std::string_view id(theme::preset().id);
+    const auto found = std::ranges::find_if(shapes, [id](const auto& shape) {
+        return id == shape.id;
+    });
+    return found != shapes.end() ? found->rotor : RotorDesign{7, 95, 125, 77};
+}
 
 void paintScenery(QPainter& painter, const QPixmap& scenery, const QRectF& artwork,
                   const QSize& panelSize) {
@@ -49,7 +82,7 @@ void paintFanIcon(QPainter& painter, QPointF position, qreal scale) {
     painter.save();
     painter.translate(position);
     painter.scale(1.32 * scale, 1.32 * scale);
-    painter.setPen(QPen(QColor("#FF98AB"), .88, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setPen(QPen(theme::tint(QColor("#FF98AB")), .88, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.setBrush(Qt::NoBrush);
     const QRectF casing{-10, -10, 20, 20};
     for (int angle : {18, 138, 258}) {
@@ -65,6 +98,18 @@ void paintFanIcon(QPainter& painter, QPointF position, qreal scale) {
         painter.rotate(120);
     }
     painter.restore();
+}
+
+void paintPortrait(QPainter& painter, const QPixmap& portrait, const QSize& panelSize) {
+    const auto fit = QSizeF(portrait.size()).scaled(
+        QSizeF(panelSize.width() * .96, panelSize.height() * .77), Qt::KeepAspectRatio);
+    const QRectF target(QPointF(panelSize.width() - fit.width() + 7.0,
+                              panelSize.height() - fit.height() + 3.0), fit);
+    painter.drawPixmap(target, portrait, portrait.rect());
+    artwork::fade(painter, target, Qt::Horizontal,
+        {{0, Qt::transparent}, {.085, Qt::white}, {1, Qt::white}});
+    artwork::fade(painter, target, Qt::Vertical,
+        {{0, Qt::transparent}, {.055, Qt::white}, {1, Qt::white}});
 }
 
 } // namespace
@@ -96,6 +141,13 @@ void FanWidget::setData(const FanStats& fans, double cpuTemperature, double gpuT
     degreesPerSecond_ = rpm_ ? std::clamp(*rpm_ / 20.0, 0.0, 270.0)
                              : mode_ == FanMode::Maximum ? 160.0 : 110.0;
     updateAnimation();
+    update();
+}
+
+void FanWidget::setCharacterArtwork(const QPixmap& portrait, const QPixmap& scene) {
+    characterPortrait_ = portrait;
+    characterScene_ = scene;
+    artworkSize_ = {};
     update();
 }
 
@@ -190,31 +242,72 @@ void FanWidget::prepareArtwork() {
     };
     static const QPixmap referenceScenery(":/reference-fan-scene.png");
     static const QPixmap referenceRotor(":/reference-fan-rotor.png");
+    const bool useReferenceScene = theme::isDefaultPreset() && !referenceScenery.isNull();
+    const auto color = [](const char* hex) { return theme::tint(QColor(hex)); };
+    const auto design = rotorDesign();
 
     panel_ = layer();
     {
         QPainter paint(&panel_);
         paint.setRenderHint(QPainter::Antialiasing);
         QLinearGradient background(outer.topLeft(), outer.bottomRight());
-        background.setColorAt(0.0, QColor("#291720"));
-        background.setColorAt(.60, QColor("#1B121A"));
-        background.setColorAt(1.0, QColor("#261826"));
+        background.setColorAt(0.0, color("#291720"));
+        background.setColorAt(.60, color("#1B121A"));
+        background.setColorAt(1.0, color("#261826"));
         paint.fillPath(outline, background);
         paint.setClipPath(outline);
+        if (!characterScene_.isNull()) {
+            paint.setRenderHint(QPainter::SmoothPixmapTransform);
+            paint.setOpacity(.68);
+            artwork::cover(paint, outer, characterScene_, .49);
+            paint.setOpacity(1);
+            QLinearGradient shadow(outer.topLeft(), outer.bottomLeft());
+            auto ink = theme::tint(theme::background);
+            ink.setAlpha(221);
+            shadow.setColorAt(0, ink);
+            ink.setAlpha(56);
+            shadow.setColorAt(.37, ink);
+            ink.setAlpha(150);
+            shadow.setColorAt(1, ink);
+            paint.fillRect(outer, shadow);
+        }
         const auto radius = (referenceRotorRadius + 1.0) * scale;
         QRadialGradient disc(center, radius, center - QPointF(0.0, 45.0 * scale));
-        disc.setColorAt(0.0, QColor("#191117"));
-        disc.setColorAt(.65, QColor("#21111A"));
-        disc.setColorAt(1.0, QColor("#271722"));
+        auto inner = color("#191117");
+        auto middle = color("#21111A");
+        auto rim = color("#271722");
+        if (!characterScene_.isNull()) {
+            inner.setAlpha(113);
+            middle.setAlpha(94);
+            rim.setAlpha(155);
+        }
+        disc.setColorAt(0.0, inner);
+        disc.setColorAt(.65, middle);
+        disc.setColorAt(1.0, rim);
         paint.setPen(Qt::NoPen);
         paint.setBrush(disc);
         paint.drawEllipse(center, radius, radius);
-        if (referenceScenery.isNull()) {
+        if (!useReferenceScene) {
             paint.setBrush(Qt::NoBrush);
-            paint.setPen(QPen(theme::border, 1.4));
+            paint.setPen(QPen(theme::tint(theme::border), 1.4));
             paint.drawEllipse(center, radius * 1.04, radius * 1.04);
-            paint.setPen(QPen(theme::primary.darker(160), 1.4));
+            paint.setPen(QPen(theme::accent().darker(155), 1.4));
             paint.drawEllipse(center, radius * .96, radius * .96);
+            paint.save();
+            paint.translate(center);
+            for (int tick = 0; tick < 36; ++tick) {
+                paint.setPen(QPen(tick % 3 == 0 ? theme::secondaryAccent()
+                                               : theme::accent().darker(175)));
+                paint.drawLine(QPointF(0, -radius * 1.025), QPointF(0, -radius * .975));
+                paint.rotate(10);
+            }
+            const QRectF arc(-radius * 1.085, -radius * 1.085,
+                             radius * 2.17, radius * 2.17);
+            paint.setPen(QPen(theme::secondaryAccent(), 1.2));
+            paint.drawArc(arc, 32 * 16, (13 + design.blades * 6) * 16);
+            paint.setPen(QPen(theme::accent(), 1.2));
+            paint.drawArc(arc, 211 * 16, (8 + design.blades * 5) * 16);
+            paint.restore();
         }
     }
 
@@ -224,24 +317,30 @@ void FanWidget::prepareArtwork() {
         paint.setRenderHint(QPainter::Antialiasing);
         paint.setRenderHint(QPainter::SmoothPixmapTransform);
         paint.setClipPath(outline);
-        if (!referenceScenery.isNull()) {
+        if (useReferenceScene) {
             paintScenery(paint, referenceScenery, artwork, size());
+        } else if (!characterPortrait_.isNull()) {
+            paintPortrait(paint, characterPortrait_, size());
         }
-        if (!referenceScenery.isNull() && artwork.bottom() - height() > 36.0 * scale) {
+        if (!characterPortrait_.isNull() ||
+            (useReferenceScene && artwork.bottom() - height() > 36.0 * scale)) {
             QLinearGradient footerShade(0, height() - 120, 0, height());
-            footerShade.setColorAt(0.0, QColor(27, 18, 26, 0));
-            footerShade.setColorAt(1.0, QColor(27, 18, 26, 196));
+            auto shade = color("#1B121A");
+            shade.setAlpha(0);
+            footerShade.setColorAt(0.0, shade);
+            shade.setAlpha(196);
+            footerShade.setColorAt(1.0, shade);
             paint.fillRect(QRectF(0, height() - 120, width(), 120), footerShade);
         }
         paint.setClipping(false);
         QLinearGradient edge(outer.topLeft(), outer.bottomRight());
-        edge.setColorAt(0.0, QColor("#955165"));
-        edge.setColorAt(.45, QColor("#4C2C43"));
-        edge.setColorAt(1.0, QColor("#42303F"));
+        edge.setColorAt(0.0, color("#955165"));
+        edge.setColorAt(.45, color("#4C2C43"));
+        edge.setColorAt(1.0, color("#42303F"));
         paint.strokePath(outline, QPen(edge, 1.0));
     }
     const int diameter = std::max(1, static_cast<int>(std::ceil(2 * referenceRotorRadius * scale * ratio)));
-    if (!referenceRotor.isNull()) {
+    if (useReferenceScene && !referenceRotor.isNull()) {
         rotor_ = referenceRotor.scaled(diameter, diameter, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     } else {
         rotor_ = QPixmap(diameter, diameter);
@@ -252,20 +351,26 @@ void FanWidget::prepareArtwork() {
         paint.scale(diameter / 320.0, diameter / 320.0);
         QPainterPath blade;
         blade.moveTo(13, -10);
-        blade.cubicTo(29, -59, 95, -128, 125, -77);
-        blade.cubicTo(152, -32, 96, -7, 24, 13);
+        blade.cubicTo(29, -59, design.shoulder, -128, design.tip, -design.sweep);
+        blade.cubicTo(151, -32, design.shoulder, -7, 24, 13);
         blade.closeSubpath();
         QLinearGradient span(18, 4, 125, -83);
-        span.setColorAt(0, QColor("#371725"));
-        span.setColorAt(1, QColor("#A93755"));
+        auto root = theme::accent().darker(330);
+        auto edge = theme::secondaryAccent().darker(140);
+        root.setAlpha(194);
+        edge.setAlpha(209);
+        span.setColorAt(0, root);
+        span.setColorAt(1, edge);
         paint.setBrush(span);
-        paint.setPen(QPen(theme::border));
-        for (int index = 0; index < 7; ++index) {
+        paint.setPen(QPen(theme::tint(theme::border)));
+        for (int index = 0; index < design.blades; ++index) {
             paint.drawPath(blade);
-            paint.rotate(360.0 / 7.0);
+            paint.rotate(360.0 / design.blades);
         }
-        paint.setBrush(QColor("#64253B"));
-        paint.drawEllipse(QPointF{}, 25, 25);
+        paint.setBrush(theme::accent().darker(210));
+        paint.drawEllipse(QPointF{}, 23, 23);
+        paint.setPen(QPen(theme::secondaryAccent(), 1.2));
+        paint.drawEllipse(QPointF{}, 12, 12);
     }
     rotor_.setDevicePixelRatio(ratio);
 }
@@ -276,7 +381,7 @@ void FanWidget::paintEvent(QPaintEvent* event) {
     const bool rotorOnly = bounds.contains(event->rect());
     prepareArtwork();
     if (!rotorOnly) {
-        painter.fillRect(rect(), theme::background);
+        painter.fillRect(rect(), theme::tint(theme::background));
     }
     painter.drawPixmap(QPointF{}, panel_);
     const auto artwork = artworkBounds();
@@ -317,7 +422,7 @@ void FanWidget::paintEvent(QPaintEvent* event) {
     const auto mode = mode_ == FanMode::Maximum ? QStringLiteral("MAKSIMUM")
         : mode_ == FanMode::Automatic ? QStringLiteral("OTOMATIS") : QString();
     print(QRectF(width() - 140.0 * textScale, 16.0, 115.0 * textScale, 25.0),
-          mode, 14, QColor("#FF829C"), QFont::DemiBold, Qt::AlignRight | Qt::AlignVCenter);
+          mode, 14, theme::tint(QColor("#FF829C")), QFont::DemiBold, Qt::AlignRight | Qt::AlignVCenter);
     print(QRectF(12, footer, width() - 24, 32.0),
           rpm_ ? QString::number(*rpm_) + " RPM" : QStringLiteral("RPM tak terbaca"),
           24, theme::text, QFont::Bold, Qt::AlignCenter);

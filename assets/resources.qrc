@@ -3,6 +3,11 @@
     <file alias="vivoguard.svg">vivoguard.svg</file>
     <file alias="vivoguard.png">vivoguard.png</file>
     <file alias="panel-texture.png">panel-texture.png</file>
+    <file>reference-header.png</file>
+    <file>reference-sidebar.png</file>
+    <file>reference-status.png</file>
+    <file>reference-fan-scene.png</file>
+    <file>reference-fan-rotor.png</file>
     <file>fonts/Oxanium-SemiBold.ttf</file>
     <file>fonts/Oxanium-OFL.txt</file>
     <file>reference-icons/activity.svg</file>

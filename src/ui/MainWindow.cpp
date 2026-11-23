@@ -1,11 +1,13 @@
 #include "ui/MainWindow.h"
 
 #include "core/ProcessController.h"
+#include "ui/Artwork.h"
 #include "ui/Theme.h"
 #include "ui/widgets/FanWidget.h"
 #include "ui/widgets/GaugeCard.h"
 #include "ui/widgets/TimelineChart.h"
 
+#include <QAbstractButton>
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QAction>
@@ -34,6 +36,7 @@
 #include <QHeaderView>
 #include <QHBoxLayout>
 #include <QIcon>
+#include <QImageReader>
 #include <QItemSelectionModel>
 #include <QLabel>
 #include <QLineEdit>
@@ -102,6 +105,7 @@ QLabel* makeValueLabel(const QString& value = "--") {
 QLabel* glyphLabel(const QString& glyph, int size) {
     auto* icon = new QLabel;
     icon->setFixedSize(size, size);
+    icon->setProperty("themeGlyph", glyph);
     icon->setPixmap(theme::icon(glyph).pixmap(size, size));
     return icon;
 }
@@ -159,6 +163,12 @@ public:
     enum class Artwork { Header, Sidebar, Sensor };
     explicit ArtworkPanel(Artwork artwork) : artwork_(artwork) {}
 
+    void setScene(const QPixmap& scene) {
+        scene_ = scene;
+        backdrop_ = {};
+        update();
+    }
+
 protected:
     void paintEvent(QPaintEvent*) override {
         QPainter painter(this);
@@ -176,7 +186,14 @@ protected:
             painter.save();
             painter.setClipPath(outline);
         }
-        if (artwork_ == Artwork::Header) {
+        if (!scene_.isNull()) {
+            const qreal ratio = devicePixelRatioF();
+            const QSize pixels = (QSizeF(size()) * ratio).toSize();
+            if (backdrop_.size() != pixels || backdrop_.devicePixelRatio() != ratio) {
+                prepareBackdrop(pixels, ratio);
+            }
+            painter.drawPixmap(QPointF{}, backdrop_);
+        } else if (artwork_ == Artwork::Header) {
             static const auto flowers = softArtwork(":/reference-header.png", 30, 5);
             const qreal start = width() * .42;
             const qreal span = std::clamp(width() - start - 348, 0.0, 408.0);
@@ -200,7 +217,40 @@ protected:
     }
 
 private:
+    void prepareBackdrop(const QSize& pixels, qreal ratio) {
+        backdrop_ = QPixmap(pixels);
+        backdrop_.setDevicePixelRatio(ratio);
+        backdrop_.fill(Qt::transparent);
+        QPainter painter(&backdrop_);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        if (artwork_ == Artwork::Sidebar) {
+            const QRectF region(0, height() * .26, width() - 1, height() * .74);
+            artwork::cover(painter, region, scene_, .66);
+            artwork::fade(painter, region, Qt::Vertical,
+                {{0, Qt::transparent}, {.30, QColor(255, 255, 255, 48)}, {.61, Qt::white},
+                 {.85, QColor(255, 255, 255, 216)}, {1, Qt::transparent}});
+        } else if (artwork_ == Artwork::Header) {
+            const qreal start = width() * .43;
+            const qreal span = std::max<qreal>(0, width() - start - 225);
+            const QRectF region(start, 1, span, height() - 2);
+            artwork::cover(painter, region, scene_, .40);
+            artwork::fade(painter, region, Qt::Horizontal,
+                {{0, Qt::transparent}, {.30, QColor(255, 255, 255, 195)},
+                 {.72, QColor(255, 255, 255, 165)}, {1, Qt::transparent}});
+            artwork::fade(painter, region, Qt::Vertical,
+                {{0, Qt::transparent}, {.33, Qt::white}, {.72, Qt::white}, {1, Qt::transparent}});
+        } else {
+            const QRectF region(1, height() * .46, width() - 2, height() * .54);
+            artwork::cover(painter, region, scene_, .68);
+            artwork::fade(painter, region, Qt::Vertical,
+                {{0, Qt::transparent}, {.53, QColor(255, 255, 255, 80)},
+                 {.85, QColor(255, 255, 255, 118)}, {1, Qt::transparent}});
+        }
+    }
+
     Artwork artwork_;
+    QPixmap scene_;
+    QPixmap backdrop_;
 };
 
 class PanelCard final : public QFrame {
@@ -218,7 +268,7 @@ protected:
 class NavigationButton final : public QPushButton {
 public:
     NavigationButton(const QString& text, const QString& icon)
-        : QPushButton(text), glyph_(theme::icon(icon)) {}
+        : QPushButton(text), glyph_(icon) {}
 
 protected:
     void paintEvent(QPaintEvent*) override {
@@ -228,12 +278,12 @@ protected:
             const auto bounds = QRectF(rect()).adjusted(.5, .5, -.5, -.5);
             const auto outline = theme::cutFrame(bounds, 11);
             QLinearGradient surface(bounds.topLeft(), bounds.bottomRight());
-            surface.setColorAt(0, isChecked() ? QColor("#733043") : QColor("#392332"));
-            surface.setColorAt(1, QColor("#301A27"));
+            surface.setColorAt(0, theme::tint(isChecked() ? QColor("#733043") : QColor("#392332")));
+            surface.setColorAt(1, theme::tint(QColor("#301A27")));
             painter.fillPath(outline, surface);
-            painter.strokePath(outline, QPen(hasFocus() ? theme::primary : theme::border));
+            painter.strokePath(outline, QPen(theme::tint(hasFocus() ? theme::primary : theme::border)));
         }
-        glyph_.paint(&painter, QRect(17, (height() - 28) / 2, 28, 28));
+        theme::icon(glyph_).paint(&painter, QRect(17, (height() - 28) / 2, 28, 28));
         painter.setFont(font());
         painter.setPen(theme::text);
         painter.drawText(QRect(63, 0, width() - 68, height()),
@@ -241,7 +291,7 @@ protected:
     }
 
 private:
-    QIcon glyph_;
+    QString glyph_;
 };
 
 QString processDisplayName(const ProcessInfo& process) {
@@ -263,6 +313,27 @@ QString reading(double value, const QString& unit, int decimals = 0) {
 QSettings monitorSettings() {
     // Retain existing user preferences across the display-name change.
     return QSettings("VivoGuard Project", "VivoGuard");
+}
+
+QString characterDirectory() {
+    return QDir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
+        .filePath(QStringLiteral("sys-monit-anime/characters"));
+}
+
+QPixmap readCharacterImage(const QString& path) {
+    if (!QFileInfo(path).isFile()) {
+        return {};
+    }
+    QImageReader reader(path, "png");
+    const auto size = reader.size();
+    if (!size.isValid() || size.width() > 4096 || size.height() > 4096 ||
+        qint64(size.width()) * size.height() > 10'000'000) {
+        return {};
+    }
+    if (size.width() > 1024 || size.height() > 1024) {
+        reader.setScaledSize(size.scaled(1024, 1024, Qt::KeepAspectRatio));
+    }
+    return QPixmap::fromImage(reader.read());
 }
 
 QString temperature(double value) {
@@ -440,6 +511,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       profile_(HardwareProfile::detect()),
       alertEngine_(profile_) {
+    theme::applyPreset(QStringLiteral("default"));
     setWindowTitle(theme::appName + " · " + QString::fromStdString(profile_.displayName));
     setWindowIcon(QIcon(":/vivoguard.png"));
     const QSize minimumWindow(1120, 720);
@@ -469,7 +541,6 @@ MainWindow::MainWindow(QWidget* parent)
     pages_->addWidget(buildProcessesPage());
     pages_->addWidget(buildThermalsPage());
     pages_->addWidget(buildCleanerPage());
-    pages_->addWidget(buildSettingsPage());
     contentLayout->addWidget(pages_, 1);
     shell->addWidget(content, 1);
     setCentralWidget(root);
@@ -483,6 +554,7 @@ MainWindow::MainWindow(QWidget* parent)
     updateFullScreenAction();
 
     setupTray();
+    pages_->addWidget(buildSettingsPage());
 
     auto settings = monitorSettings();
     const int interval =
@@ -560,7 +632,8 @@ QWidget* MainWindow::buildSidebar() {
     brandRow->setSpacing(12);
     auto* icon = new QLabel;
     icon->setFixedSize(55, 55);
-    icon->setPixmap(theme::svgIcon(":/vivoguard.svg").pixmap(55, 55));
+    icon->setObjectName("brandIcon");
+    icon->setPixmap(theme::brandIcon().pixmap(55, 55));
     brandRow->addWidget(icon);
     auto* brandText = new QVBoxLayout;
     brandText->setSpacing(0);
@@ -763,6 +836,7 @@ QWidget* MainWindow::buildOverviewPage() {
     freeMemory->setObjectName("primary");
     freeMemory->setProperty("dashboardAction", true);
     freeMemory->setIcon(theme::icon("rocket"));
+    freeMemory->setProperty("themeGlyph", QStringLiteral("rocket"));
     freeMemory->setIconSize(QSize(28, 28));
     connect(freeMemory, &QPushButton::clicked, this, [this] {
         if (linuxActions) {
@@ -776,6 +850,7 @@ QWidget* MainWindow::buildOverviewPage() {
     openCleaner->setObjectName("secondary");
     openCleaner->setProperty("dashboardAction", true);
     openCleaner->setIcon(theme::icon(linuxActions ? "brush" : "fan"));
+    openCleaner->setProperty("themeGlyph", linuxActions ? QStringLiteral("brush") : QStringLiteral("fan"));
     openCleaner->setIconSize(QSize(28, 28));
     connect(openCleaner, &QPushButton::clicked,
         this, [this] { switchPage(linuxActions ? 3 : 2); });
@@ -1036,10 +1111,12 @@ QWidget* MainWindow::buildCleanerPage() {
 }
 
 QWidget* MainWindow::buildSettingsPage() {
-    auto* canvas = new QWidget;
+    auto* canvas = new QWidget(pages_);
     auto* layout = new QVBoxLayout(canvas);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(14);
+
+    layout->addWidget(buildAppearanceCard(canvas));
 
     auto* profileCard = createCard();
     auto* profileLayout = new QGridLayout(profileCard);
@@ -1152,11 +1229,142 @@ QWidget* MainWindow::buildSettingsPage() {
     return scroll;
 }
 
+QWidget* MainWindow::buildAppearanceCard(QWidget* parent) {
+    auto* card = createCard();
+    card->setParent(parent);
+    auto* fields = new QGridLayout(card);
+    fields->setContentsMargins(22, 16, 22, 16);
+    fields->setHorizontalSpacing(20);
+    fields->setVerticalSpacing(8);
+    fields->setColumnStretch(1, 1);
+    fields->addWidget(panelHeading("layers", "Tampilan"), 0, 0, 1, 3);
+
+    auto* characters = new QComboBox;
+    characters->setObjectName("appearanceCharacter");
+    for (const auto& preset : theme::presets) {
+        const QString key = QString::fromLatin1(preset.id);
+        characters->addItem(QString::fromUtf8(preset.name), key);
+    }
+    auto* characterLabel = makeLabel("KARAKTER", "brandAccent");
+    characterLabel->setBuddy(characters);
+    fields->addWidget(characterLabel, 1, 0);
+    fields->addWidget(characters, 1, 1);
+
+    auto* preview = makeLabel({});
+    preview->setObjectName("characterPreview");
+    preview->setFixedSize(128, 98);
+    preview->setAlignment(Qt::AlignCenter);
+    fields->addWidget(preview, 1, 2, 2, 1, Qt::AlignCenter);
+    const QDir artFolder(characterDirectory());
+    const auto applyCharacter = [this, preview, artFolder](const QString& id) {
+        QPixmap portrait;
+        QPixmap scene;
+        if (id != "default") {
+            portrait = readCharacterImage(artFolder.filePath(id + "/portrait.png"));
+            scene = readCharacterImage(artFolder.filePath(id + "/scene.png"));
+            if (portrait.isNull() || scene.isNull()) {
+                const auto bundled = QStringLiteral(":/characters/") + id;
+                portrait = readCharacterImage(bundled + "/portrait.png");
+                scene = readCharacterImage(bundled + "/scene.png");
+            }
+            if (portrait.isNull() || scene.isNull()) {
+                return false;
+            }
+        }
+        applyCharacterTheme(id, portrait, scene);
+        if (scene.isNull()) {
+            const QPixmap image(":/reference-fan-scene.png");
+            preview->setPixmap(image.isNull() ? theme::brandIcon().pixmap(48, 48)
+                : image.scaled(preview->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        } else {
+            QPixmap image(preview->size());
+            image.fill(Qt::transparent);
+            {
+                QPainter painter(&image);
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+                painter.setClipPath(theme::cutFrame(QRectF(image.rect()), 10));
+                artwork::cover(painter, image.rect(), scene, .46);
+                const auto fit = QSizeF(portrait.size()).scaled(QSizeF(image.size()), Qt::KeepAspectRatio);
+                painter.drawPixmap(QRectF(QPointF(image.width() - fit.width(), 0), fit),
+                                   portrait, portrait.rect());
+            }
+            preview->setPixmap(image);
+        }
+        return true;
+    };
+
+    auto settings = monitorSettings();
+    const auto savedCharacter = settings.value("appearance/character", "default").toString();
+    auto character = savedCharacter;
+    if (savedCharacter == "hinata") {
+        character = QStringLiteral("killua");
+    } else if (savedCharacter == "tsunade") {
+        character = QStringLiteral("naruto");
+    }
+    const int index = characters->findData(character);
+    const bool restored = index > 0 && applyCharacter(characters->itemData(index).toString());
+    characters->setCurrentIndex(restored ? index : 0);
+    if (!restored) {
+        applyCharacter("default");
+    } else if (character != savedCharacter) {
+        settings.setValue("appearance/character", character);
+    }
+
+    connect(characters, &QComboBox::currentIndexChanged, this,
+        [this, characters, applyCharacter,
+         appliedIndex = characters->currentIndex()](int selected) mutable {
+            const auto id = characters->itemData(selected).toString();
+            if (id.isEmpty()) {
+                return;
+            }
+            if (!applyCharacter(id)) {
+                const QSignalBlocker blocker(characters);
+                characters->setCurrentIndex(appliedIndex);
+                QMessageBox::warning(this, "Ilustrasi karakter",
+                    "Potret atau latar karakter tidak dapat dibaca.");
+                return;
+            }
+            appliedIndex = selected;
+            monitorSettings().setValue("appearance/character", id);
+        });
+    return card;
+}
+
+void MainWindow::applyCharacterTheme(const QString& id, const QPixmap& portrait, const QPixmap& scene) {
+    theme::applyPreset(id);
+    overviewFan_->setCharacterArtwork(portrait, scene);
+    thermalFan_->setCharacterArtwork(portrait, scene);
+
+    const auto brand = theme::brandIcon();
+    setWindowIcon(brand);
+    QApplication::setWindowIcon(brand);
+    if (tray_) {
+        tray_->setIcon(brand);
+    }
+    for (auto* widget : findChildren<QWidget*>()) {
+        if (auto* illustration = dynamic_cast<ArtworkPanel*>(widget)) {
+            illustration->setScene(scene);
+        }
+        const auto glyph = widget->property("themeGlyph").toString();
+        if (auto* label = qobject_cast<QLabel*>(widget)) {
+            if (label->objectName() == "brandIcon") {
+                label->setPixmap(brand.pixmap(label->size()));
+            } else if (!glyph.isEmpty()) {
+                label->setPixmap(theme::icon(glyph).pixmap(label->size()));
+            }
+        } else if (auto* button = qobject_cast<QAbstractButton*>(widget); button && !glyph.isEmpty()) {
+            button->setIcon(theme::icon(glyph));
+        }
+        widget->update();
+    }
+    updateFullScreenAction();
+}
+
 void MainWindow::setupTray() {
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         return;
     }
-    tray_ = new QSystemTrayIcon(QIcon(":/vivoguard.png"), this);
+    tray_ = new QSystemTrayIcon(theme::brandIcon(), this);
     tray_->setToolTip(theme::appName + " · Memulai sensor");
 
     auto* menu = new QMenu(this);

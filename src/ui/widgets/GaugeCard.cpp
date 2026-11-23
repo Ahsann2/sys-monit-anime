@@ -31,6 +31,21 @@ QString displayedStatus(const QString& status, bool stale) {
     return status;
 }
 
+QColor gaugeAccent(GaugeCard::Icon icon, const QColor& fallback) {
+    if (theme::isDefaultPreset()) {
+        return fallback;
+    }
+    const auto colors = theme::seriesColors();
+    switch (icon) {
+    case GaugeCard::Icon::Cpu: return colors[0];
+    case GaugeCard::Icon::Memory: return colors[1];
+    case GaugeCard::Icon::Gpu: return colors[2];
+    case GaugeCard::Icon::Disk:
+    case GaugeCard::Icon::Battery: return colors[0].lighter(130);
+    }
+    return fallback;
+}
+
 } // namespace
 
 GaugeCard::GaugeCard(
@@ -125,7 +140,7 @@ void GaugeCard::drawIcon(QPainter& painter, const QRectF& bounds) const {
     painter.translate(bounds.topLeft());
     painter.scale(bounds.width() / 26.0, bounds.height() / 26.0);
     const qreal lineWidth = std::clamp(bounds.width() * .04, .95, 1.2);
-    painter.setPen(QPen(accent_.lighter(126), lineWidth * 26.0 / bounds.width(),
+    painter.setPen(QPen(gaugeAccent(icon_, accent_).lighter(126), lineWidth * 26.0 / bounds.width(),
                        Qt::SolidLine, Qt::RoundCap,
                        Qt::RoundJoin));
     painter.setBrush(Qt::NoBrush);
@@ -212,23 +227,25 @@ void GaugeCard::drawSparkline(QPainter& painter, const QRectF& bounds) const {
     fill.lineTo(bounds.bottomLeft());
     fill.closeSubpath();
 
+    const auto accent = gaugeAccent(icon_, accent_);
     QLinearGradient vertical(bounds.topLeft(), bounds.bottomLeft());
-    vertical.setColorAt(0.0, withAlpha(accent_, 37));
-    vertical.setColorAt(1.0, withAlpha(accent_, 3));
+    vertical.setColorAt(0.0, withAlpha(accent, 37));
+    vertical.setColorAt(1.0, withAlpha(accent, 3));
     painter.fillPath(fill, vertical);
 
     QLinearGradient horizontal(bounds.topLeft(), bounds.topRight());
-    horizontal.setColorAt(0.0, withAlpha(accent_, 0));
-    horizontal.setColorAt(.2, withAlpha(accent_, 35));
-    horizontal.setColorAt(.62, withAlpha(accent_, 69));
-    horizontal.setColorAt(1.0, withAlpha(accent_, 1));
+    horizontal.setColorAt(0.0, withAlpha(accent, 0));
+    horizontal.setColorAt(.2, withAlpha(accent, 35));
+    horizontal.setColorAt(.62, withAlpha(accent, 69));
+    horizontal.setColorAt(1.0, withAlpha(accent, 1));
     painter.strokePath(line, QPen(QBrush(horizontal), 1.2));
 }
 
 void GaugeCard::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.fillRect(rect(), theme::background);
+    painter.fillRect(rect(), theme::tint(theme::background));
+    const auto accent = gaugeAccent(icon_, accent_);
 
     const QRectF card = QRectF(rect()).adjusted(.5, .5, -.5, -.5);
     const qreal scale = compactSizingEnabled_
@@ -246,7 +263,7 @@ void GaugeCard::paintEvent(QPaintEvent*) {
     painter.restore();
     painter.save();
     painter.setClipPath(outline);
-    const QColor ambient("#C1475C");
+    const auto ambient = theme::tint(QColor("#C1475C"));
     QRadialGradient wash(QPointF(inset, 0), card.width() * .75);
     wash.setColorAt(0, withAlpha(ambient, 35));
     wash.setColorAt(.54, withAlpha(ambient, 10));
@@ -256,10 +273,10 @@ void GaugeCard::paintEvent(QPaintEvent*) {
         card.width() * .62, 67 * scale));
     painter.restore();
     QLinearGradient trim(card.topLeft(), card.bottomRight());
-    trim.setColorAt(0.0, QColor("#B55870"));
-    trim.setColorAt(.38, QColor("#783C51"));
-    trim.setColorAt(.7, QColor("#51323E"));
-    trim.setColorAt(1.0, QColor("#422D38"));
+    trim.setColorAt(0.0, theme::tint(QColor("#B55870")));
+    trim.setColorAt(.38, theme::tint(QColor("#783C51")));
+    trim.setColorAt(.7, theme::tint(QColor("#51323E")));
+    trim.setColorAt(1.0, theme::tint(QColor("#422D38")));
     painter.strokePath(outline, QPen(QBrush(trim), 1.0));
 
     const qreal iconSize = metric(32, 21);
@@ -277,8 +294,12 @@ void GaugeCard::paintEvent(QPaintEvent*) {
         painter.fontMetrics().horizontalAdvance(status) + metric(16, 10));
     const auto badgeRect = QRectF(width() - badgeWidth - (inset - 3),
                                   15 * scale, badgeWidth, metric(20, 14));
-    const auto statusColor = stale_ || icon_ == Icon::Disk ? theme::amber
-        : icon_ == Icon::Gpu ? theme::pink.lighter(119) : QColor("#FF8A9B");
+    auto statusColor = accent.lighter(119);
+    if (stale_ || (theme::isDefaultPreset() && icon_ == Icon::Disk)) {
+        statusColor = theme::amber;
+    } else if (theme::isDefaultPreset() && icon_ != Icon::Gpu) {
+        statusColor = QColor("#FF8A9B");
+    }
     painter.setPen(QPen(withAlpha(statusColor, 137), 1));
     painter.setBrush(withAlpha(statusColor, 21));
     painter.drawRoundedRect(badgeRect, 6, 6);
@@ -301,19 +322,20 @@ void GaugeCard::paintEvent(QPaintEvent*) {
                        53 * scale - thermalShift,
                        diameter, diameter);
     QConicalGradient ring(gauge.center(), 270);
-    ring.setColorAt(0.0, QColor("#37242F"));
-    ring.setColorAt(.40, withAlpha(accent_, 122));
-    ring.setColorAt(.65, withAlpha(accent_, 111));
-    ring.setColorAt(1.0, QColor("#37242F"));
+    const auto ringShadow = theme::tint(QColor("#37242F"));
+    ring.setColorAt(0.0, ringShadow);
+    ring.setColorAt(.40, withAlpha(accent, 122));
+    ring.setColorAt(.65, withAlpha(accent, 111));
+    ring.setColorAt(1.0, ringShadow);
     painter.setBrush(Qt::NoBrush);
     const qreal stroke = metric(6.4, 4);
     painter.setPen(QPen(QBrush(ring), stroke, Qt::SolidLine, Qt::FlatCap));
     painter.drawArc(gauge, 225 * 16, -270 * 16);
     if (readingAvailable_ && progress_ > 0) {
         QLinearGradient signal(gauge.bottomLeft(), gauge.topRight());
-        signal.setColorAt(0, accent_);
-        signal.setColorAt(.72, accent_.lighter(130));
-        signal.setColorAt(1, accent_.lighter(147));
+        signal.setColorAt(0, accent);
+        signal.setColorAt(.72, accent.lighter(130));
+        signal.setColorAt(1, accent.lighter(147));
         painter.setPen(QPen(QBrush(signal), stroke, Qt::SolidLine, Qt::FlatCap));
         painter.drawArc(gauge, 225 * 16,
             static_cast<int>(-270.0 * 16.0 * progress_ / 100.0));
@@ -353,7 +375,7 @@ void GaugeCard::paintEvent(QPaintEvent*) {
     unitFont.setWeight(QFont::DemiBold);
     unitFont.setLetterSpacing(QFont::AbsoluteSpacing, .45);
     painter.setFont(unitFont);
-    painter.setPen(accent_.lighter(122));
+    painter.setPen(accent.lighter(122));
     const auto caption = percentUnit ? unit_.sliced(1).trimmed() : unit_;
     painter.drawText(QRectF(inset, 95 * scale - thermalShift, valueWidth, metric(19, 13)),
         Qt::AlignVCenter | Qt::AlignLeft,
@@ -370,13 +392,13 @@ void GaugeCard::paintEvent(QPaintEvent*) {
 
     const QRectF bar(inset, height() - 16 * scale, subtitleWidth, metric(4, 3));
     painter.setPen(Qt::NoPen);
-    painter.setBrush(withAlpha(accent_, 100));
+    painter.setBrush(withAlpha(accent, 100));
     painter.drawRoundedRect(bar, 2, 2);
     if (readingAvailable_ && progress_ > 0) {
         const QRectF fill(bar.topLeft(), QSizeF(bar.width() * progress_ * .01, bar.height()));
         QLinearGradient sheen(fill.topLeft(), fill.topRight());
-        sheen.setColorAt(0, accent_.lighter(121));
-        sheen.setColorAt(1, accent_);
+        sheen.setColorAt(0, accent.lighter(121));
+        sheen.setColorAt(1, accent);
         painter.setBrush(sheen);
         painter.drawRoundedRect(fill, 2, 2);
     }

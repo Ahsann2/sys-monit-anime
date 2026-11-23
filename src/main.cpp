@@ -27,33 +27,6 @@ int main(int argc, char* argv[]) {
         QApplication::setStyle(fusion);
     }
 
-    QPalette darkPalette;
-    const auto& darkBg = vg::ui::theme::background;
-    const auto& panelBg = vg::ui::theme::panel;
-    const auto& panelRaised = vg::ui::theme::panelRaised;
-    const auto& textLight = vg::ui::theme::text;
-    const auto& textMuted = vg::ui::theme::muted;
-
-    darkPalette.setColor(QPalette::Window, darkBg);
-    darkPalette.setColor(QPalette::WindowText, textLight);
-    darkPalette.setColor(QPalette::Base, panelBg);
-    darkPalette.setColor(QPalette::AlternateBase, panelRaised);
-    darkPalette.setColor(QPalette::ToolTipBase, panelBg);
-    darkPalette.setColor(QPalette::ToolTipText, textLight);
-    darkPalette.setColor(QPalette::Text, textLight);
-    darkPalette.setColor(QPalette::Button, panelBg);
-    darkPalette.setColor(QPalette::ButtonText, textLight);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, vg::ui::theme::primary);
-    darkPalette.setColor(QPalette::Highlight, QColor("#7F2135"));
-    darkPalette.setColor(QPalette::HighlightedText, textLight);
-    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, textMuted);
-    darkPalette.setColor(QPalette::Disabled, QPalette::Text, textMuted);
-    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, textMuted);
-    QApplication::setPalette(darkPalette);
-
-    application.setStyleSheet(vg::ui::theme::styleSheet());
-
     vg::ui::MainWindow window;
     const bool trayMode =
         application.arguments().contains("--tray");

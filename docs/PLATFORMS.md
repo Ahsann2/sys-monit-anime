@@ -24,6 +24,27 @@ Pustaka NVML berasal dari driver NVIDIA pengguna. Aplikasi tidak memasang
 driver, menaikkan hak akses saat membaca data, atau melakukan kontrol kipas
 pada model yang belum divalidasi.
 
+## Tampilan
+
+Pilih karakter lewat **Pengaturan → Tampilan** untuk menerapkan palet, ikon,
+potret, latar, dan rotor sekaligus. Semua tema sudah disertakan di aplikasi.
+Untuk mengganti ilustrasi secara lokal, simpan `portrait.png` dan `scene.png`
+di folder karakter di bawah `sys-monit-anime/characters` pada direktori data
+pengguna, lalu buka ulang aplikasi.
+
+| Karakter | Nama folder |
+| --- | --- |
+| Sung Jinwoo | `sung-jinwoo` |
+| Sasuke Uchiha | `sasuke` |
+| Tanjiro Kamado | `tanjiro` |
+| Giyu Tomioka | `giyu` |
+| Satoru Gojo | `gojo` |
+| Sanemi Shinazugawa | `sanemi` |
+| Muichiro Tokito | `muichiro` |
+| Itachi Uchiha | `itachi` |
+| Killua Zoldyck | `killua` |
+| Naruto Uzumaki · Kurama | `naruto` |
+
 ## Build desktop
 
 Gunakan Qt 6.4+ (Core, Widgets, SVG dan DBus khusus Linux), CMake 3.22+, dan

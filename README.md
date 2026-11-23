@@ -2,6 +2,8 @@
 
 Dashboard pemantau perangkat dengan animasi kipas. C++20 dan Qt 6 untuk Linux, Windows, dan macOS. Data sensor mengikuti dukungan OS dan driver.
 
+Pilih tema bawaan atau salah satu dari 10 tema karakter di **Pengaturan → Tampilan**.
+
 ## Cara menjalankan
 
 Butuh kompiler C++20, CMake 3.22+, Ninja, dan Qt 6.4+ dengan modul Core, Widgets, dan SVG. Linux juga perlu Qt DBus. Di Windows, gunakan Developer PowerShell dengan arsitektur yang sesuai dengan SDK Qt dan tambahkan direktori `bin` Qt ke `PATH`.

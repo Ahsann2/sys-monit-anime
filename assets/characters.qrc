@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="/">
+    <file>characters/giyu/portrait.png</file>
+    <file>characters/giyu/scene.png</file>
+    <file>characters/gojo/portrait.png</file>
+    <file>characters/gojo/scene.png</file>
+    <file>characters/itachi/portrait.png</file>
+    <file>characters/itachi/scene.png</file>
+    <file>characters/killua/portrait.png</file>
+    <file>characters/killua/scene.png</file>
+    <file>characters/muichiro/portrait.png</file>
+    <file>characters/muichiro/scene.png</file>
+    <file>characters/naruto/portrait.png</file>
+    <file>characters/naruto/scene.png</file>
+    <file>characters/sanemi/portrait.png</file>
+    <file>characters/sanemi/scene.png</file>
+    <file>characters/sasuke/portrait.png</file>
+    <file>characters/sasuke/scene.png</file>
+    <file>characters/sung-jinwoo/portrait.png</file>
+    <file>characters/sung-jinwoo/scene.png</file>
+    <file>characters/tanjiro/portrait.png</file>
+    <file>characters/tanjiro/scene.png</file>
+  </qresource>
+</RCC>

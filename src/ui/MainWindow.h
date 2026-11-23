@@ -22,6 +22,7 @@ class QEvent;
 class QFrame;
 class QLabel;
 class QLineEdit;
+class QPixmap;
 class QProgressBar;
 class QProcess;
 class QPushButton;
@@ -56,6 +57,8 @@ private:
     QWidget* buildThermalsPage();
     QWidget* buildCleanerPage();
     QWidget* buildSettingsPage();
+    QWidget* buildAppearanceCard(QWidget* parent);
+    void applyCharacterTheme(const QString& id, const QPixmap& portrait, const QPixmap& scene);
     QFrame* createCard(const QString& objectName = "card") const;
     QPushButton* createNavButton(
         const QString& label,

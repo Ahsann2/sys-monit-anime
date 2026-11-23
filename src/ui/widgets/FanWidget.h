@@ -14,6 +14,7 @@ public:
     explicit FanWidget(bool sharedFan, QWidget* parent = nullptr);
 
     void setData(const FanStats& fans, double cpuTemperature, double gpuTemperature);
+    void setCharacterArtwork(const QPixmap& portrait, const QPixmap& scene);
     [[nodiscard]] QSize sizeHint() const override;
 
 protected:
@@ -36,6 +37,8 @@ private:
     QPixmap panel_;
     QPixmap scenery_;
     QPixmap rotor_;
+    QPixmap characterPortrait_;
+    QPixmap characterScene_;
     QSize artworkSize_;
     qreal pixelRatio_{0.0};
     double rotation_{0.0};
