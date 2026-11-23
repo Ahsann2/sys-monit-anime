@@ -48,6 +48,7 @@ pengguna, lalu buka ulang aplikasi.
 | Spider-Man | `spider-man` |
 | Doma · Bulan Atas Dua | `doma` |
 | Akaza · Bulan Atas Tiga | `akaza` |
+| Ryomen Sukuna | `sukuna` |
 
 ## Build desktop
 

@@ -62,6 +62,74 @@ RotorDesign rotorDesign() {
     return found != shapes.end() ? found->rotor : RotorDesign{7, 95, 125, 77};
 }
 
+void paintShrineRotor(QPainter& painter) {
+    QPainterPath blade;
+    blade.moveTo(13, 5);
+    blade.cubicTo(32, -9, 42, -53, 84, -75);
+    blade.lineTo(129, -76);
+    blade.lineTo(99, -55);
+    blade.lineTo(109, -51);
+    blade.cubicTo(83, -21, 51, -11, 23, 9);
+    blade.closeSubpath();
+
+    QPainterPath edge;
+    edge.moveTo(27, 0);
+    edge.cubicTo(53, -25, 62, -55, 115, -72);
+    QLinearGradient lacquer(14, 5, 126, -75);
+    lacquer.setColorAt(0, QColor("#211018"));
+    lacquer.setColorAt(.54, QColor("#851327"));
+    lacquer.setColorAt(1, QColor("#EC3C56"));
+    const QColor rim(255, 90, 113, 164);
+    const QRectF ring(-145, -145, 290, 290);
+
+    for (int index = 0; index < 4; ++index) {
+        painter.setBrush(lacquer);
+        painter.setPen(QPen(QColor("#D54B62"), 1.2));
+        painter.drawPath(blade);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(QColor("#FF9A90"), 2, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPath(edge);
+        painter.setPen(QPen(rim, 1.2));
+        painter.drawArc(ring, 13 * 16, 51 * 16);
+        painter.drawLine(QPointF(145, 0), QPointF(136, -8));
+        painter.drawLine(QPointF(139, 6), QPointF(130, -2));
+        painter.rotate(90);
+    }
+
+    painter.setPen(QPen(QColor("#F26370"), 1.6));
+    painter.setBrush(QColor("#200C13"));
+    painter.drawPolygon(QPolygonF{QPointF(0, -25), QPointF(25, 0),
+        QPointF(0, 25), QPointF(-25, 0)});
+    painter.setPen(QPen(QColor("#FFAB89"), 1.6, Qt::SolidLine, Qt::RoundCap));
+    painter.drawLine(QPointF(-10, 7), QPointF(7, -10));
+    painter.drawLine(QPointF(-5, 12), QPointF(12, -5));
+}
+
+void paintStandardRotor(QPainter& painter, const RotorDesign& design) {
+    QPainterPath blade;
+    blade.moveTo(13, -10);
+    blade.cubicTo(29, -59, design.shoulder, -128, design.tip, -design.sweep);
+    blade.cubicTo(151, -32, design.shoulder, -7, 24, 13);
+    blade.closeSubpath();
+    QLinearGradient span(18, 4, 125, -83);
+    auto root = theme::accent().darker(330);
+    auto edge = theme::secondaryAccent().darker(140);
+    root.setAlpha(194);
+    edge.setAlpha(209);
+    span.setColorAt(0, root);
+    span.setColorAt(1, edge);
+    painter.setBrush(span);
+    painter.setPen(QPen(theme::tint(theme::border)));
+    for (int index = 0; index < design.blades; ++index) {
+        painter.drawPath(blade);
+        painter.rotate(360.0 / design.blades);
+    }
+    painter.setBrush(theme::accent().darker(210));
+    painter.drawEllipse(QPointF{}, 23, 23);
+    painter.setPen(QPen(theme::secondaryAccent(), 1.2));
+    painter.drawEllipse(QPointF{}, 12, 12);
+}
+
 void paintScenery(QPainter& painter, const QPixmap& scenery, const QRectF& artwork,
                   const QSize& panelSize) {
     const qreal scale = artwork.width() / artworkWidth;
@@ -359,28 +427,11 @@ void FanWidget::prepareArtwork() {
         paint.setRenderHint(QPainter::Antialiasing);
         paint.translate(diameter / 2.0, diameter / 2.0);
         paint.scale(diameter / 320.0, diameter / 320.0);
-        QPainterPath blade;
-        blade.moveTo(13, -10);
-        blade.cubicTo(29, -59, design.shoulder, -128, design.tip, -design.sweep);
-        blade.cubicTo(151, -32, design.shoulder, -7, 24, 13);
-        blade.closeSubpath();
-        QLinearGradient span(18, 4, 125, -83);
-        auto root = theme::accent().darker(330);
-        auto edge = theme::secondaryAccent().darker(140);
-        root.setAlpha(194);
-        edge.setAlpha(209);
-        span.setColorAt(0, root);
-        span.setColorAt(1, edge);
-        paint.setBrush(span);
-        paint.setPen(QPen(theme::tint(theme::border)));
-        for (int index = 0; index < design.blades; ++index) {
-            paint.drawPath(blade);
-            paint.rotate(360.0 / design.blades);
+        if (theme::currentPreset() == "sukuna") {
+            paintShrineRotor(paint);
+        } else {
+            paintStandardRotor(paint, design);
         }
-        paint.setBrush(theme::accent().darker(210));
-        paint.drawEllipse(QPointF{}, 23, 23);
-        paint.setPen(QPen(theme::secondaryAccent(), 1.2));
-        paint.drawEllipse(QPointF{}, 12, 12);
     }
     rotor_.setDevicePixelRatio(ratio);
 }

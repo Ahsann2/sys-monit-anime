@@ -76,6 +76,8 @@ inline constexpr std::array presets{
         "M8 25a11 11 0 0 1 20 0l-10 4Z M18 29V12m0 17-6-15m6 15 6-15 M18 5v3m-6-1 2 2m10-2-2 2"},
     Preset{"akaza", "Akaza · Bulan Atas Tiga", 218, 0x6B9DFF, 0x54DCF7, 0xD0DDFF,
         "M18 5v26M7 12l22 12M7 24l22-12M14 7l4 4 4-4m-8 22 4-4 4 4 M7 16l6-1-2-6m18 11-6 1 2 6 M7 20l6 1-2 6m18-11-6-1 2-6"},
+    Preset{"sukuna", "Ryomen Sukuna", 7, 0xFF5269, 0xFF916F, 0xD1A4F5,
+        "M7 15l3-5 8-4 8 4 3 5H7Z M10 18h16v9H10Z M6 30h24 M14 27v-5h8v5 M15 10l3 2 3-2"},
 };
 
 namespace detail {
