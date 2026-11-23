@@ -1,5 +1,6 @@
 #include "core/AlertEngine.h"
 #include "core/Cleaner.h"
+#include "core/IntelGpuUsage.h"
 #include "core/ProcessController.h"
 #include "core/SystemSampler.h"
 
@@ -17,6 +18,72 @@
 #include <unistd.h>
 
 namespace {
+
+bool checksIntelGpuUsage() {
+    namespace fs = std::filesystem;
+    std::string directory = (fs::temp_directory_path() / "monitor-intel-XXXXXX").string();
+    if (!mkdtemp(directory.data())) {
+        return false;
+    }
+    const struct Scratch {
+        fs::path path;
+        ~Scratch() {
+            std::error_code error;
+            fs::remove_all(path, error);
+        }
+    } scratch{directory};
+
+    const auto device = scratch.path / "0000:00:02.0";
+    fs::create_directories(device / "drm/renderD128");
+    const auto proc = scratch.path / "proc";
+    const auto writeClient = [&](int fd, int id, int render, int video,
+                                 std::string_view address = "0000:00:02.0") {
+        const auto process = proc / "123";
+        const auto name = std::to_string(fd);
+        fs::create_directories(process / "fd");
+        fs::create_directories(process / "fdinfo");
+        const auto link = process / "fd" / name;
+        if (!fs::is_symlink(link)) {
+            fs::create_symlink("/dev/dri/renderD128", link);
+        }
+        std::ofstream(process / "fdinfo" / name)
+            << "drm-driver:\ti915\ndrm-pdev:\t" << address
+            << "\ndrm-client-id:\t" << id
+            << "\ndrm-engine-render:\t" << render << " ns"
+            << "\ndrm-engine-video:\t" << video << " ns"
+            << "\ndrm-engine-capacity-video:\t2\n";
+    };
+    writeClient(4, 1, 100, 100);
+    writeClient(5, 1, 100, 100);
+    writeClient(6, 2, 100, 100);
+    writeClient(7, 3, 100, 100, "0000:01:00.0");
+
+    vg::IntelGpuUsage usage(proc);
+    const auto start = std::chrono::steady_clock::now();
+    using namespace std::chrono_literals;
+    if (usage.sample(device, start)) {
+        return false;
+    }
+    writeClient(4, 1, 300, 700);
+    writeClient(5, 1, 300, 700);
+    writeClient(6, 2, 200, 500);
+    writeClient(7, 3, 5000, 5000, "0000:01:00.0");
+    if (usage.sample(device, start + 1000ns) != 50.0) {
+        return false;
+    }
+    writeClient(4, 1, 200, 700);
+    writeClient(5, 1, 200, 700);
+    if (usage.sample(device, start + 2000ns) != 0.0) {
+        return false;
+    }
+    writeClient(4, 1, 400, 700);
+    writeClient(5, 1, 400, 700);
+    if (usage.sample(device, start + 3000ns) != 10.0) {
+        return false;
+    }
+    fs::remove_all(proc / "123");
+    return !usage.sample(device, start + 4000ns);
+}
 
 bool checksCleanupScope() {
     namespace fs = std::filesystem;
@@ -199,6 +266,10 @@ int main() {
     if (!checksCleanupScope()) {
         std::cerr << "Cleaner scope check failed\n";
         return 8;
+    }
+    if (!checksIntelGpuUsage()) {
+        std::cerr << "Intel GPU usage counters check failed\n";
+        return 9;
     }
 
     std::cout << "core-smoke: PASS · "

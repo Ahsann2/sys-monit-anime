@@ -10,7 +10,7 @@ untuk setiap sistem operasi. Perangkat dibaca saat aplikasi berjalan.
 | Baterai dan daya AC | power supply sysfs | Win32 | IOKit Power Sources |
 | Daftar proses dan statistik yang dapat dibaca | Proses pengguna melalui procfs | Toolhelp dan Win32 | libproc |
 | Adaptor grafis | DRM dan driver | DXGI, klasifikasi UMA jika D3D12 tersedia | Metal |
-| Beban dan suhu GPU | NVIDIA NVML dan sebagian sensor AMD yang tersedia | NVIDIA NVML jika DLL driver dapat dimuat | Identitas GPU via Metal |
+| Beban dan suhu GPU | NVIDIA NVML, beban aplikasi Intel i915, dan sensor AMD yang tersedia | NVIDIA NVML jika DLL driver dapat dimuat | Identitas GPU via Metal |
 | Suhu CPU dan RPM | Kernel dan driver perangkat | Tergantung integrasi sensor tambahan, saat ini N/A | Tergantung integrasi sensor tambahan, saat ini N/A |
 | Kontrol kipas | ASUS GL752VW melalui ASUS WMI dan autentikasi admin | — | — |
 | Aksi proses, cache, dan login otomatis | Tersedia sesuai dukungan kernel dan desktop | Pemantauan | Pemantauan |
@@ -18,6 +18,8 @@ untuk setiap sistem operasi. Perangkat dibaca saat aplikasi berjalan.
 Sensor dan izin berbeda menurut model, firmware, driver, dan akun. Aplikasi
 menampilkan `N/A` atau celah pada grafik bila data tidak tersedia. Angka RPM
 hanya muncul saat kernel atau driver menyediakan pembacaan yang sah.
+Beban aplikasi Intel dihitung dari kanal GPU tersibuk di antara proses yang
+dapat dibaca oleh akun pengguna.
 Pustaka NVML berasal dari driver NVIDIA pengguna. Aplikasi tidak memasang
 driver, menaikkan hak akses saat membaca data, atau melakukan kontrol kipas
 pada model yang belum divalidasi.

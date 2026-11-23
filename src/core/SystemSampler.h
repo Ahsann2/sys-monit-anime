@@ -3,6 +3,9 @@
 #include "core/HardwareProfile.h"
 #include "core/NvmlMonitor.h"
 #include "core/Types.h"
+#if defined(__linux__)
+#include "core/IntelGpuUsage.h"
+#endif
 
 #include <chrono>
 #include <cstdint>
@@ -60,7 +63,7 @@ private:
     [[nodiscard]] static bool isProtectedProcess(
         const ProcessInfo& process,
         const HardwareProfile& profile);
-    [[nodiscard]] GpuStats sampleIntegratedGpu() const;
+    [[nodiscard]] GpuStats sampleIntegratedGpu();
 
     HardwareProfile profile_;
 #if !defined(__APPLE__)
@@ -79,6 +82,9 @@ private:
     std::vector<GpuStats> graphicsDevices_;
     std::chrono::steady_clock::time_point nextGraphicsDiscovery_{};
     std::chrono::steady_clock::time_point previousProcessSampleTime_{};
+#if defined(__linux__)
+    IntelGpuUsage intelGpuUsage_;
+#endif
 #if defined(_WIN32)
     void* pdhQuery_{nullptr};
     void* pdhCpu_{nullptr};

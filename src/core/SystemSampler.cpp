@@ -468,7 +468,7 @@ void SystemSampler::sampleThermals(SystemSnapshot& snapshot) const {
     snapshot.disk.temperatureC = diskTemperature;
 }
 
-GpuStats SystemSampler::sampleIntegratedGpu() const {
+GpuStats SystemSampler::sampleIntegratedGpu() {
     GpuStats result;
     result.discrete = false;
     result.name = profile_.expectedIntegratedGpu;
@@ -494,6 +494,16 @@ GpuStats SystemSampler::sampleIntegratedGpu() const {
                 card.path() / "gt_cur_freq_mhz"));
             if (frequency && *frequency <= 10000) {
                 result.graphicsClockMhz = static_cast<int>(*frequency);
+            }
+            std::error_code deviceError;
+            const auto driver = fs::read_symlink(device / "driver", deviceError);
+            if (driver.filename() == "i915") {
+                const auto pciDevice = fs::canonical(device, deviceError);
+                if (const auto usage = intelGpuUsage_.sample(pciDevice)) {
+                    result.usagePercent = *usage;
+                    result.utilizationAvailable = true;
+                    result.utilizationFromClients = true;
+                }
             }
             break;
         }

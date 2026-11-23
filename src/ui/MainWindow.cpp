@@ -685,7 +685,7 @@ QWidget* MainWindow::buildOverviewPage() {
     metrics->addWidget(gpuCard_, 1, 0);
     metrics->addWidget(diskCard_, 1, 1);
     resourceChart_ = new TimelineChart;
-    overviewFan_ = new FanWidget;
+    overviewFan_ = new FanWidget(profile_.gl752vwFanControl);
     metrics->addWidget(resourceChart_, 2, 0, 1, 2);
     metrics->addWidget(overviewFan_, 0, 2, 3, 1);
     metrics->setColumnStretch(0, 41);
@@ -875,7 +875,7 @@ QWidget* MainWindow::buildThermalsPage() {
 
     auto* top = new QHBoxLayout;
     top->setSpacing(14);
-    thermalFan_ = new FanWidget;
+    thermalFan_ = new FanWidget(profile_.gl752vwFanControl);
     thermalFan_->setMaximumHeight(380);
     top->addWidget(thermalFan_, 2);
 
@@ -1314,6 +1314,10 @@ void MainWindow::updateOverview() {
                  swap, pressure));
 
     const auto& gpu = snapshot_.discreteGpu.available ? snapshot_.discreteGpu : snapshot_.integratedGpu;
+    const auto gpuClientScope = QStringLiteral("Beban GPU dari aplikasi yang dapat dipantau oleh akun ini.");
+    const auto gpuTooltip = gpu.utilizationFromClients ? gpuClientScope : QString();
+    gpuCard_->setToolTip(gpuTooltip);
+    resourceChart_->setToolTip(gpuTooltip);
     if (gpu.available) {
         auto name = QString::fromStdString(gpu.name);
         if (name.startsWith("NVIDIA GeForce")) {
@@ -1336,7 +1340,7 @@ void MainWindow::updateOverview() {
         gpuCard_->setReading(
             gpu.usagePercent,
             gpu.utilizationAvailable ? reading(gpu.usagePercent, "") : QStringLiteral("N/A"),
-            "% BEBAN GPU",
+            gpu.utilizationFromClients ? "% BEBAN APLIKASI" : "% BEBAN GPU",
             vram + " · " + temperature(gpu.temperatureC));
     }
 
@@ -1368,13 +1372,24 @@ void MainWindow::updateOverview() {
     networkDetail_->setText(network.available
         ? "↑ " + formatRate(network.transmitBytesPerSecond) : QString());
     const auto& igpu = snapshot_.integratedGpu;
+    const auto igpuClock = reading(igpu.graphicsClockMhz, " MHz");
+    const auto igpuLoad = reading(igpu.usagePercent, "%", igpu.utilizationFromClients ? 1 : 0);
+    const bool showClock = igpu.utilizationFromClients && igpu.graphicsClockMhz >= 0;
     integratedGpuValue_->setText(!igpu.available ? QStringLiteral("N/A")
-        : igpu.utilizationAvailable ? reading(igpu.usagePercent, "%")
-                                    : reading(igpu.graphicsClockMhz, " MHz"));
-    integratedGpuDetail_->setText(igpu.utilizationAvailable
-        ? temperature(igpu.temperatureC)
-        : igpu.available ? QStringLiteral("Beban N/A") : QString());
-    integratedGpuValue_->setToolTip(igpu.available ? QString::fromStdString(igpu.name) : QString());
+        : igpu.utilizationAvailable && !showClock ? igpuLoad : igpuClock);
+    integratedGpuDetail_->setText(showClock ? QStringLiteral("Aplikasi %1").arg(igpuLoad)
+        : igpu.utilizationFromClients ? QStringLiteral("Beban aplikasi")
+        : igpu.utilizationAvailable ? temperature(igpu.temperatureC)
+        : igpu.available ? QStringLiteral("Beban tak terbaca") : QString());
+    QString igpuTooltip = igpu.available ? QString::fromStdString(igpu.name) : QString();
+    if (igpu.graphicsClockMhz >= 0) {
+        igpuTooltip += "\n" + igpuClock;
+    }
+    if (igpu.utilizationFromClients) {
+        igpuTooltip += "\n" + gpuClientScope;
+    }
+    integratedGpuValue_->setToolTip(igpuTooltip);
+    integratedGpuDetail_->setToolTip(igpuTooltip);
     const auto& ac = snapshot_.battery.acOnline;
     const QString acText = !ac ? QStringLiteral("AC N/A")
         : *ac ? QStringLiteral("AC") : QStringLiteral("Tanpa AC");
@@ -1416,7 +1431,7 @@ void MainWindow::updateThermals() {
 
     if (fanCommand_ == nullptr) {
         const auto rpmText = [](const std::optional<int>& rpm) {
-            return rpm ? QString::number(*rpm) + " RPM" : QStringLiteral("RPM N/A");
+            return rpm ? QString::number(*rpm) + " RPM" : QStringLiteral("RPM tak terbaca");
         };
         QString status = QString("Kipas CPU %1 · %2\nKanal kipas GPU %3")
             .arg(fanModeName(fans.cpuMode), rpmText(fans.cpuRpm), rpmText(fans.gpuRpm));

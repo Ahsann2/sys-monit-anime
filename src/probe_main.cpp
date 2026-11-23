@@ -39,6 +39,7 @@ int main() {
     const auto& profile = sampler.profile();
     const auto& cpu = snapshot.cpu;
     const auto& ram = snapshot.memory;
+    const auto& integrated = snapshot.integratedGpu;
     const auto& gpu = snapshot.discreteGpu;
     const auto& fans = snapshot.fans;
     const char* mode = fans.cpuMode == vg::FanMode::Maximum ? "maximum"
@@ -69,7 +70,9 @@ int main() {
         std::cout << "N/A";
     }
     std::cout << "\nIntegrated GPU: "
-              << (snapshot.integratedGpu.available ? snapshot.integratedGpu.name : "N/A")
+              << (integrated.available ? integrated.name : "N/A") << " · "
+              << reading(integrated.usagePercent, "%", integrated.utilizationAvailable)
+              << (integrated.utilizationFromClients ? " (application load)" : "")
               << "\nDiscrete GPU: " << (gpu.available ? gpu.name : "N/A") << " · "
               << (gpu.sleeping ? "RTD3 sleep" : reading(gpu.temperatureC, " °C", gpu.temperatureC > 0))
               << "\nGraphics adapters:";

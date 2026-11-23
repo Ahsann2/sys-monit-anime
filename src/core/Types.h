@@ -80,6 +80,7 @@ struct GpuStats {
     std::uint64_t memoryTotalBytes{0};
     double temperatureC{0.0};
     bool utilizationAvailable{false};
+    bool utilizationFromClients{false};
     double powerWatts{-1.0};
     int fanPercent{-1};
     int graphicsClockMhz{-1};

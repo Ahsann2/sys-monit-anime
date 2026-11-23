@@ -69,8 +69,8 @@ void paintFanIcon(QPainter& painter, QPointF position, qreal scale) {
 
 } // namespace
 
-FanWidget::FanWidget(QWidget* parent)
-    : QWidget(parent) {
+FanWidget::FanWidget(bool sharedFan, QWidget* parent)
+    : QWidget(parent), sharedFan_(sharedFan) {
     setMinimumSize(225, 300);
     timer_.setSingleShot(true);
     timer_.setTimerType(Qt::PreciseTimer);
@@ -78,12 +78,19 @@ FanWidget::FanWidget(QWidget* parent)
 }
 
 void FanWidget::setData(const FanStats& fans, double cpuTemperature, double gpuTemperature) {
-    if (rpm_ == fans.cpuRpm && mode_ == fans.cpuMode &&
+    const bool useGpuChannel = !fans.cpuRpm && fans.gpuRpm.has_value();
+    const auto rpm = useGpuChannel ? fans.gpuRpm : fans.cpuRpm;
+    const auto mode = useGpuChannel && !sharedFan_ ? FanMode::Unknown : fans.cpuMode;
+    if (rpm_ == rpm && usingGpuChannel_ == useGpuChannel && mode_ == mode &&
         cpuTemperature_ == cpuTemperature && gpuTemperature_ == gpuTemperature) {
         return;
     }
-    rpm_ = fans.cpuRpm;
-    mode_ = fans.cpuMode;
+    rpm_ = rpm;
+    usingGpuChannel_ = useGpuChannel;
+    mode_ = mode;
+    setToolTip(sharedFan_ && useGpuChannel
+        ? QStringLiteral("RPM kipas sistem dari kanal kedua driver ASUS (fan2_input).")
+        : QString());
     cpuTemperature_ = cpuTemperature;
     gpuTemperature_ = gpuTemperature;
     degreesPerSecond_ = rpm_ ? std::clamp(*rpm_ / 20.0, 0.0, 270.0)
@@ -285,7 +292,7 @@ void FanWidget::paintEvent(QPaintEvent* event) {
     painter.restore();
     painter.drawPixmap(QPointF{}, scenery_);
     const qreal textScale = std::clamp(width() / artworkWidth, .81, 1.14);
-    const qreal footer = height() - (rpm_ ? 79.0 : 93.0) * textScale;
+    const qreal footer = height() - 79.0 * textScale;
     // A wide crop can put the rotor beneath a live label. Repaint that label
     // along with the rotor so it does not disappear between telemetry updates.
     if (rotorOnly && event->rect().top() >= 43 && event->rect().bottom() < footer) {
@@ -303,19 +310,17 @@ void FanWidget::paintEvent(QPaintEvent* event) {
     };
     painter.setRenderHint(QPainter::Antialiasing);
     paintFanIcon(painter, QPointF(36.0 * textScale, 30.0), textScale);
+    const auto title = sharedFan_ ? QStringLiteral("KIPAS SISTEM")
+        : usingGpuChannel_ ? QStringLiteral("KIPAS GPU") : QStringLiteral("KIPAS CPU");
     print(QRectF(62.0 * textScale, 15.0, width() - 140.0 * textScale, 28.0),
-          "KIPAS CPU", 18, theme::text, QFont::Bold, Qt::AlignLeft | Qt::AlignVCenter);
+          title, 18, theme::text, QFont::Bold, Qt::AlignLeft | Qt::AlignVCenter);
     const auto mode = mode_ == FanMode::Maximum ? QStringLiteral("MAKSIMUM")
-        : mode_ == FanMode::Automatic ? QStringLiteral("OTOMATIS") : QStringLiteral("MODE N/A");
+        : mode_ == FanMode::Automatic ? QStringLiteral("OTOMATIS") : QString();
     print(QRectF(width() - 140.0 * textScale, 16.0, 115.0 * textScale, 25.0),
           mode, 14, QColor("#FF829C"), QFont::DemiBold, Qt::AlignRight | Qt::AlignVCenter);
     print(QRectF(12, footer, width() - 24, 32.0),
-          rpm_ ? QString::number(*rpm_) + " RPM" : QStringLiteral("RPM N/A"),
+          rpm_ ? QString::number(*rpm_) + " RPM" : QStringLiteral("RPM tak terbaca"),
           24, theme::text, QFont::Bold, Qt::AlignCenter);
-    if (!rpm_) {
-        print(QRectF(12, footer + 31.0, width() - 24, 23.0), "Animasi ilustrasi",
-              14, QColor("#E0A3B9"), QFont::Medium, Qt::AlignCenter);
-    }
     const auto degrees = [](double celsius) {
         return celsius > 0 ? QString::number(celsius, 'f', 0) + " °C" : QStringLiteral("N/A");
     };

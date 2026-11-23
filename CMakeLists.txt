@@ -26,7 +26,7 @@ add_library(vivoguard_core STATIC
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_sources(vivoguard_core PRIVATE src/core/Cleaner.cpp src/core/NvmlMonitor.cpp
+    target_sources(vivoguard_core PRIVATE src/core/Cleaner.cpp src/core/IntelGpuUsage.cpp src/core/NvmlMonitor.cpp
         src/core/ProcessController.cpp src/core/SystemSampler.cpp)
     target_link_libraries(vivoguard_core PUBLIC ${CMAKE_DL_LIBS})
 elseif(WIN32)

@@ -118,7 +118,7 @@ void transfer(auto& wire, GpuStats& value) {
     wire(value.available, value.sleeping, value.discrete, value.name,
         value.usagePercent, value.memoryUsagePercent, value.memoryUsedBytes,
         value.memoryTotalBytes, value.temperatureC, value.utilizationAvailable,
-        value.powerWatts, value.fanPercent, value.graphicsClockMhz);
+        value.utilizationFromClients, value.powerWatts, value.fanPercent, value.graphicsClockMhz);
 }
 void transfer(auto& wire, DiskStats& value) {
     wire(value.ratesAvailable, value.totalBytes, value.freeBytes, value.usedBytes, value.readBytesPerSecond,

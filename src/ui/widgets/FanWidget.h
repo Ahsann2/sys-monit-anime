@@ -11,7 +11,7 @@ namespace vg::ui {
 
 class FanWidget final : public QWidget {
 public:
-    explicit FanWidget(QWidget* parent = nullptr);
+    explicit FanWidget(bool sharedFan, QWidget* parent = nullptr);
 
     void setData(const FanStats& fans, double cpuTemperature, double gpuTemperature);
     [[nodiscard]] QSize sizeHint() const override;
@@ -41,6 +41,8 @@ private:
     double rotation_{0.0};
     double degreesPerSecond_{110.0};
     std::optional<int> rpm_;
+    const bool sharedFan_;
+    bool usingGpuChannel_{false};
     FanMode mode_{FanMode::Unknown};
     double cpuTemperature_{0.0};
     double gpuTemperature_{0.0};
