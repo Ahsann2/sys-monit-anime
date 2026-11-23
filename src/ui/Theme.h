@@ -68,6 +68,8 @@ inline constexpr std::array presets{
         "M20 5 9 21h8l-2 10 12-16h-8l1-10Z M7 9l3 4 M26 24l3 4 M26 8l-3 3 M8 27l3-3"},
     Preset{"naruto", "Naruto Uzumaki · Kurama", 38, 0xFFC34D, 0xFF884A, 0x9CD9FF,
         "M6 7l8 6h8l8-6-2 12-4 5-6 6-6-6-4-5Z M10 17l5 3 M26 17l-5 3 M16 24h4 M18 24v3"},
+    Preset{"shinobu", "Shinobu Kocho", 290, 0xCD9CF2, 0x8FDEC6, 0xF5B9DA,
+        "M18 16C15 9 7 6 5 10c-3 5 3 10 9 10-5 1-7 5-4 8 3 2 7-1 8-6 1 5 5 8 8 6 3-3 1-7-4-8 6 0 12-5 9-10-2-4-10-1-13 6Z M18 16v7m0-7-4-6m4 6 4-6"},
 };
 
 namespace detail {

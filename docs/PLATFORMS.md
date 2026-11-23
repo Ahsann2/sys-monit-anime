@@ -44,6 +44,7 @@ pengguna, lalu buka ulang aplikasi.
 | Itachi Uchiha | `itachi` |
 | Killua Zoldyck | `killua` |
 | Naruto Uzumaki · Kurama | `naruto` |
+| Shinobu Kocho | `shinobu` |
 
 ## Build desktop
 
